@@ -1,8 +1,7 @@
-package dev.leonk;
+package dev.leonk.blocks;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -15,6 +14,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import dev.leonk.BeatCraft;
 
 @DatabaseTable(tableName = "beat_blocks")
 public class BeatBlock {

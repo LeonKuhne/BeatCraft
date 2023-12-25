@@ -5,6 +5,7 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
+import dev.leonk.blocks.BeatBlock;
 
 
 public class Sequencer extends BeatBlock {

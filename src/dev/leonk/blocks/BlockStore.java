@@ -1,4 +1,4 @@
-package dev.leonk;
+package dev.leonk.blocks;
 
 import java.io.File;
 import java.util.HashSet;
@@ -7,6 +7,8 @@ import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
+
+import dev.leonk.BeatCraft;
 
 import org.bukkit.Sound;
 import org.bukkit.block.Block;

@@ -1,4 +1,4 @@
-package dev.leonk;
+package dev.leonk.blocks;
 
 import java.util.function.Consumer;
 
@@ -9,6 +9,9 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.ItemStack;
+
+import dev.leonk.BeatCraft;
+import dev.leonk.Sequencer;
 
 public class BlockListener implements Listener {
 

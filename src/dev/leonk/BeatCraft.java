@@ -9,6 +9,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import dev.leonk.blocks.BlockListener;
+import dev.leonk.blocks.BlockStore;
+
 public class BeatCraft extends JavaPlugin {
 
   public static Logger log;
