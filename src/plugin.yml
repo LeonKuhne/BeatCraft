@@ -1,0 +1,13 @@
+# required
+name: BeatCraft
+version: 0.1
+main: dev.leonk.BeatCraft
+# optional
+description: Minecraft as a DAW; MaaD - Sequencers, sends, custom samples, and more!
+api-version: 1.20
+author: Leon Kuehne
+website: leonk.dev
+commands:
+  rain: 
+    description: "Beat it."
+    usage: /<command> [todo]

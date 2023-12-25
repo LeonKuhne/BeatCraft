@@ -1,0 +1,33 @@
+#!/bin/bash
+
+title beatcraft
+debug a sequencer is made out of note blocks surrounding a beat
+debug a repeater...
+
+help .cd | indent
+
+function build() {
+  mvn clean compile assembly:single
+}
+
+function upload() {
+  build
+  if [ ! -d "test" ]; then
+    err "Expected test server directory 'test' containing script 'start.sh'" && return
+  fi
+  
+  jar=target/beatcraft-1.0-SNAPSHOT-jar-with-dependencies.jar
+  cp $jar test/plugins/BeatCraft.jar
+}
+
+function test() {
+  upload
+  (cd test && ./start.sh)
+}
+
+function dev() {
+  test
+  echo "restarting... ctrl+C to cancel"
+  sleep 1
+  dev
+}
