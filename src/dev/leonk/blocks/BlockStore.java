@@ -33,9 +33,29 @@ public class BlockStore extends HashSet<BeatBlock> {
   // accessors
 
   public boolean add(Block block) { return add(new BeatBlock(block)); }
+  public boolean remove(Block block) { 
+    for (BeatBlock beat : this) {
+      if (beat.block.equals(block)) {
+        return remove(beat);
+      }
+    }
+    return false;
+  }
 
   // 
   // db
+
+  public void load() {
+    try {
+      BeatCraft.debug(String.format("loading %d blocks", blockTable.countOf()));
+      for (BeatBlock beat : blockTable.queryForAll()) {
+        add(beat.init());
+      }
+    } catch (Exception e) {
+      BeatCraft.debug("could not load blocks");
+      e.printStackTrace();
+    }
+  }
 
   public void save() {
     try {
@@ -46,18 +66,6 @@ public class BlockStore extends HashSet<BeatBlock> {
       }
     } catch (Exception e) {
       BeatCraft.debug("could not save blocks");
-      e.printStackTrace();
-    }
-  }
-
-  public void load() {
-    try {
-      BeatCraft.debug(String.format("loading %d blocks", blockTable.countOf()));
-      for (BeatBlock beat : blockTable.queryForAll()) {
-        add(beat.init());
-      }
-    } catch (Exception e) {
-      BeatCraft.debug("could not load blocks");
       e.printStackTrace();
     }
   }
