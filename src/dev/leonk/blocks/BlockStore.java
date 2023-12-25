@@ -34,21 +34,13 @@ public class BlockStore extends HashSet<BeatBlock> {
 
   public boolean add(Block block) { return add(new BeatBlock(block)); }
 
-  public boolean remove(Block block) {
-    for (BeatBlock beatBlock : this) {
-      if (beatBlock.block.equals(block)) {
-        return super.remove(beatBlock);
-      }
-    }
-    return false;
-  }
-
   // 
   // db
 
   public void save() {
     try {
       BeatCraft.debug(String.format("saving %d blocks", size()));
+      TableUtils.clearTable(db, BeatBlock.class);
       for (BeatBlock beat : this) {
         blockTable.create(beat);
       }

@@ -95,4 +95,16 @@ public class BeatBlock {
   public static void setType(Block block, String type) {
     block.setMetadata(BASE_TYPE, new FixedMetadataValue(BeatCraft.plugin, type));
   }
+
+  //
+  // helpers
+
+  @Override
+  public int hashCode() { return block.hashCode(); }
+  @Override
+  public boolean equals(Object other) { 
+    if (other instanceof Block) return block.equals(other);
+    if (!(other instanceof BeatBlock)) return false;
+    return block.equals(((BeatBlock) other).block); 
+  }
 }
