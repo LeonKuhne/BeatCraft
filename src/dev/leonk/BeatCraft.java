@@ -1,24 +1,21 @@
 package dev.leonk;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-
-import org.bukkit.block.Block;
+import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class BeatCraft extends JavaPlugin {
 
   public static Logger log;
   public static JavaPlugin plugin;
+  public static List<String> todo = new ArrayList<>();
   private BlockStore blocks;
-  private List<String> todo;
+  private BlockListener blockUpdates;
 
   // 
   // lifecycle
@@ -28,44 +25,22 @@ public class BeatCraft extends JavaPlugin {
     plugin = this;
     log = getLogger();
     blocks = new BlockStore();
-
-
-    Listener blockListener = new Listener() {
-      @EventHandler
-      public void onBlockPlace(BlockPlaceEvent event) {
-        log.info("player interacted");
-        ItemStack item = event.getItemInHand();
-        // check if sequencer
-        if (item == null || !Sequencer.isSequencer(item)) return;
-        log.info("sequencer placed");
-        event.getPlayer().sendMessage("placed sequencer");
-        // add metadata to block
-        Block block = event.getBlockPlaced();
-        Sequencer.asSequencer(block);
-        blocks.add(block);
-      }
-      @EventHandler
-      public void onBlockBreak(BlockBreakEvent event) {
-        log.info("player broke");
-        Block block = event.getBlock();
-        // check if sequencer
-        if (!Sequencer.isSequencer(block)) return;
-        log.info("sequencer broken");
-        // add metadata to received item
-        ItemStack item = Sequencer.getItem(1);
-        event.getPlayer().getInventory().addItem(item);
-      }
-    };
-    getServer().getPluginManager().registerEvents(blockListener, this);
-
-    // todo
-    todo.add("right click sequencer to change speed, indicate using color/pitch/something");
+    blockUpdates = new BlockListener(
+      block -> blocks.add(block), 
+      block -> blocks.remove(block),
+      () -> blocks.save()
+    );
   }
 
   @Override
   public void onEnable() {
-    // load sequencer
-    BeatCraft.plugin.getServer().addRecipe(Sequencer.getRecipe());
+    Server server = getServer();
+    blocks.load();
+    server.addRecipe(Sequencer.getRecipe());
+    server.getPluginManager().registerEvents(blockUpdates, this);
+    server.getScheduler().scheduleSyncRepeatingTask(this, () -> {
+      blocks.tick();
+    }, 0, 1);
   }
 
   @Override
@@ -80,5 +55,12 @@ public class BeatCraft extends JavaPlugin {
       for (String item : todo) sender.sendMessage("- " + item);
     }
     return true;
+  }
+
+  public static void debug(String string) {
+    log.info(string);
+    for (Player player : plugin.getServer().getOnlinePlayers()) {
+      player.sendMessage(string);
+    }
   }
 }
