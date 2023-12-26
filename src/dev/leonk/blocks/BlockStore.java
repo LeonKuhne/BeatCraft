@@ -1,45 +1,25 @@
 package dev.leonk.blocks;
 
 import java.io.File;
-import java.util.HashSet;
+import java.util.Set;
+import java.util.function.BiConsumer;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
-
 import dev.leonk.BeatCraft;
-
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 
-public class BlockStore extends HashSet<BeatBlock> { 
+public class BlockStore { 
   private ConnectionSource db; 
   private Dao<BeatBlock, Integer> blockTable;
+  private BiConsumer<Block, String> onPlace;
 
-  public BlockStore() {
+  public BlockStore(BiConsumer<Block, String> onPlace) {
     super();
     connect();
-  }
-
-  public void tick() {
-    for (BeatBlock beat : this) {
-      // play a sound at the block
-      beat.block.getWorld().playSound(beat.block.getLocation(), Sound.BLOCK_ANVIL_USE, 1, 1);
-    }
-  }
-
-  //
-  // accessors
-
-  public boolean add(Block block) { return add(new BeatBlock(block)); }
-  public boolean remove(Block block) { 
-    for (BeatBlock beat : this) {
-      if (beat.block.equals(block)) {
-        return remove(beat);
-      }
-    }
-    return false;
+    this.onPlace = onPlace;
   }
 
   // 
@@ -48,8 +28,8 @@ public class BlockStore extends HashSet<BeatBlock> {
   public void load() {
     try {
       BeatCraft.debug(String.format("loading %d blocks", blockTable.countOf()));
-      for (BeatBlock beat : blockTable.queryForAll()) {
-        add(beat.init());
+      for (BeatBlock block : blockTable.queryForAll()) {
+        onPlace.accept(BeatBlock.getBlockAt(block), block.type);
       }
     } catch (Exception e) {
       BeatCraft.debug("could not load blocks");
@@ -57,12 +37,12 @@ public class BlockStore extends HashSet<BeatBlock> {
     }
   }
 
-  public void save() {
+  public void save(Set<BeatBlock> blocks) {
     try {
-      BeatCraft.debug(String.format("saving %d blocks", size()));
+      BeatCraft.debug(String.format("saving %d blocks", blocks.size()));
       TableUtils.clearTable(db, BeatBlock.class);
-      for (BeatBlock beat : this) {
-        blockTable.create(beat);
+      for (BeatBlock block : blocks) {
+        blockTable.create(block);
       }
     } catch (Exception e) {
       BeatCraft.debug("could not save blocks");
@@ -76,13 +56,20 @@ public class BlockStore extends HashSet<BeatBlock> {
       // ensure that the data folder exists
       path.mkdirs();
       // connect to the database
-      db = new JdbcConnectionSource("jdbc:sqlite:" + path + "/beatcraft.db");
+      db = new JdbcConnectionSource(String.format("jdbc:sqlite:%s/%s.db", path, "beat-blocks"));
       blockTable = DaoManager.createDao(db, BeatBlock.class);
       TableUtils.createTableIfNotExists(db, BeatBlock.class);
+      // print table contents
+      BeatCraft.debug(String.format("loaded %d blocks:", blockTable.countOf()));
+      for (BeatBlock block : blockTable.queryForAll()) {
+        BeatCraft.debug(String.format("- loaded %s @ (%d, %d, %d) in %s", block.type, block.x, block.y, block.z, block.world));
+      }
     } catch (Exception e) {
-      BeatCraft.debug("could not connect");
+      BeatCraft.debug("could not connect to database");
       e.printStackTrace();
     }
   }
-
+  
+  // 
+  // helpers
 }
