@@ -1,8 +1,6 @@
 #!/bin/bash
 
 title beatcraft
-debug a sequencer is made out of note blocks surrounding a beat
-debug a repeater...
 
 help .cd | indent
 

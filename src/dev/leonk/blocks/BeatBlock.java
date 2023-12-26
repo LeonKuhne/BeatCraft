@@ -14,17 +14,18 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+
 import dev.leonk.BeatCraft;
 
-@DatabaseTable(tableName = "beat_blocks")
+@DatabaseTable(tableName = "send_blocks")
 public class BeatBlock {
   protected static String BASE_TYPE = "beat_block";
-  protected static String base;
-  protected static String description;
-  protected static Material material;
   protected static NamespacedKey itemId = new NamespacedKey(BeatCraft.plugin, BASE_TYPE);
+  protected Block block;
 
-  public Block block;
+  static {
+    BeatCraft.todo.add("have blocks emit particles to indicate their type");
+  }
 
   @DatabaseField(generatedId = true)
   private int id;
@@ -37,34 +38,41 @@ public class BeatBlock {
   @DatabaseField
   public int z;
   @DatabaseField
-  public String type;
+  protected String type;
 
-  public BeatBlock(Block block) {
+  public BeatBlock() {}
+  public BeatBlock(BeatBlock block, String type) {
+    this(BeatCraft.plugin.getServer().getWorld(block.world).getBlockAt(block.x, block.y, block.z), type);
+  }
+  public BeatBlock(Block block, String type) {
+    this.type = type;
     this.block = block;
     this.world = block.getWorld().getName();
     this.x = block.getX();
     this.y = block.getY();
     this.z = block.getZ();
-    this.setType(base);
+    block.setMetadata(BASE_TYPE, new FixedMetadataValue(BeatCraft.plugin, type));
   }
 
-  // db constructor
-  public BeatBlock() {}
-  public BeatBlock init() {
-    this.block = BeatCraft.plugin.getServer().getWorld(world).getBlockAt(x, y, z);
-    BeatBlock.setType(this.block, type);
-    return this;
+  public String getName() { return type; }
+  public Block getBlock() { return block; }
+  public void tick() {
+    // override in subclasses
+  }
+
+  public static Block getBlockAt(BeatBlock block) {
+    return BeatCraft.plugin.getServer().getWorld(block.world).getBlockAt(block.x, block.y, block.z);
   }
 
   //
   // accessors
 
-  public static ItemStack getItem(int amount) {
+  public static ItemStack getItem(String type, String description, Material material, int amount) {
     ItemStack item = new ItemStack(material, amount);
     ItemMeta meta = item.getItemMeta();
-    meta.setDisplayName(ChatColor.GOLD + base);
+    meta.setDisplayName(ChatColor.GOLD + type);
     meta.setLore(new ArrayList<String>() {{ add(description); }});
-    meta.getPersistentDataContainer().set(itemId, PersistentDataType.STRING, base);
+    meta.getPersistentDataContainer().set(itemId, PersistentDataType.STRING, type);
     item.setItemMeta(meta);
     return item;
   }
@@ -87,14 +95,6 @@ public class BeatBlock {
     return meta.get(0).asString();
   }
 
-  public void setType(String type) {
-    this.type = type;
-    setType(block, type);
-  }
-
-  public static void setType(Block block, String type) {
-    block.setMetadata(BASE_TYPE, new FixedMetadataValue(BeatCraft.plugin, type));
-  }
 
   //
   // helpers
