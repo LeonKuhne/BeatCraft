@@ -89,7 +89,6 @@ public class Sequencer extends BeatBlock {
     pos = pos.add(.5, 1.5, .5);
     double noteColor = note.getId() / 24D;
     pos.getWorld().spawnParticle(Particle.NOTE, pos, 0, noteColor, 0, 0, 1);
-    
   }
 
   public void disconnect(BeatBlock removedBeat) {
