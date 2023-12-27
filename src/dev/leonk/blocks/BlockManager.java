@@ -16,7 +16,6 @@ import dev.leonk.Sequencer;
 import dev.leonk.Send;
 
 public class BlockManager {
-  
   private BlockListener blockUpdates;
   private BlockStore blockStorage;
   private Set<BeatBlock> blocks;
