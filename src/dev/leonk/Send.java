@@ -20,7 +20,7 @@ public class Send extends BeatBlock {
 
   @Override
   public void tick() {
-    block.getWorld().playSound(block.getLocation(), Sound.BLOCK_AZALEA_STEP, 1, 1);
+    //block.getWorld().playSound(block.getLocation(), Sound.BLOCK_AZALEA_STEP, 1, 1);
   }
 
   public static ItemStack getItem(int amount) {

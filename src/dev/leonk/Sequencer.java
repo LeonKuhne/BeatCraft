@@ -19,6 +19,7 @@ public class Sequencer extends BeatBlock {
 
   static {
     BeatCraft.todo.add("right click sequencer to change speed, indicate using color/pitch/something");
+    BeatCraft.todo.add("add delay based on the type of block that is put in the line (like weight or something)");
   }
 
   private boolean active;
@@ -35,28 +36,37 @@ public class Sequencer extends BeatBlock {
     // when sequencers are placed
     if (active) {
       // search for neighboring sends or sequencers
-      int maxDistance = 10;
+      int maxDistance = 50;
       Map<BlockFace, Block> matches = BlockManager.searchCross(block, maxDistance, this::interruptSignal);
       for (Entry<BlockFace, Block> entry : matches.entrySet()) {
-        BeatCraft.debug("sequencer found " + entry.getValue().getType());
-        playNext.put(entry.getKey(), block);
+        BeatCraft.debug(String.format("sequencer found %s in line", entry.getKey()));
+        playNext.put(entry.getKey(), block.getRelative(entry.getKey()));
       }
       active = false;
       return;
     }
 
     // play the next sequence
+    Map<BlockFace, Block> nextBlocks = new HashMap<>();
     for (Entry<BlockFace, Block> entry : playNext.entrySet()) {
-      BlockFace direction = (BlockFace) entry.getKey();
-      Block block = entry.getValue().getRelative(direction);
-      // play a note, if its not air
-      if (block.getType() == Material.AIR) {
-        block.getWorld().playSound(block.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1, 1);
-      }
-      // stop/continue
-      if (interruptSignal(block)) { playNext.remove(direction); continue; }
-      playNext.put(direction, block);
+      Block prev = entry.getValue();
+      // stop
+      if (interruptSignal(prev)) { continue; }
+      // play
+      play(prev);
+      // next
+      BlockFace direction =  entry.getKey();
+      Block next = prev.getRelative(direction);
+      // continue
+      nextBlocks.put(direction, next);
     }
+    playNext.clear();
+    playNext.putAll(nextBlocks);
+  }
+
+  public void play(Block sample) {
+    if (sample.getType() == Material.AIR) return;
+    block.getWorld().playSound(block.getLocation(), Sound.BLOCK_ANVIL_HIT, 1, 1);
   }
 
   public static ItemStack getItem(int amount) {

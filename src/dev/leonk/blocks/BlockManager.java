@@ -33,7 +33,7 @@ public class BlockManager {
     server.addRecipe(Sequencer.craftRecipe());
     server.addRecipe(Send.craftRecipe());
     server.getPluginManager().registerEvents(blockUpdates, plugin);
-    server.getScheduler().scheduleSyncRepeatingTask(plugin, this::tick, 0, 15);
+    server.getScheduler().scheduleSyncRepeatingTask(plugin, this::tick, 0, 4);
   }
 
   public void tick() {
@@ -44,7 +44,7 @@ public class BlockManager {
 
   public static Map<BlockFace, Block> searchCross(Block block, int maxDistance, Function<Block, Boolean> match) {
     Map<BlockFace, Block> matches = new HashMap<>();
-    for (BlockFace direction : BlockFace.values()) {
+    for (BlockFace direction : directions()) {
       Block found = searchDirection(block, direction, maxDistance, match);
       if (found == null) continue;
       matches.put(direction, found);
@@ -83,6 +83,7 @@ public class BlockManager {
     BeatCraft.debug(String.format("breaking %s", type));
     if (!remove(block)) return;
     dropItem(type, block.getLocation());
+    block.removeMetadata(BeatBlock.BASE_TYPE, BeatCraft.plugin);
   }
 
   private void dropItem(String type, Location pos) {
@@ -109,5 +110,16 @@ public class BlockManager {
       }
     }
     return false;
+  }
+
+  private static Set<BlockFace> directions() {
+    return new HashSet<BlockFace>() {{
+      add(BlockFace.EAST);
+      add(BlockFace.WEST);
+      add(BlockFace.UP);
+      add(BlockFace.DOWN);
+      add(BlockFace.NORTH);
+      add(BlockFace.SOUTH);
+    }};
   }
 }
