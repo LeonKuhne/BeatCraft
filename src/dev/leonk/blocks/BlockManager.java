@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.block.Block;
@@ -19,6 +18,10 @@ public class BlockManager {
   private BlockListener blockUpdates;
   private BlockStore blockStorage;
   private Set<BeatBlock> blocks;
+
+  static {
+    BeatCraft.todo.add("stop sequencers when connections are broken");
+  }
 
   public BlockManager() {
     blockUpdates = new BlockListener(this::transmute, this::destroy, this::saveWorld);
@@ -41,21 +44,27 @@ public class BlockManager {
     }
   }
 
-  public static Map<BlockFace, Block> searchCross(Block block, int maxDistance, Function<Block, Boolean> match) {
+  private void forwardSignal(Block block, BlockFace direction) {
+    BeatBlock beat = find(block);
+    if (beat == null) return;
+    beat.receiveSignal(direction);
+  }
+
+  public static Map<BlockFace, Block> searchCross(Block block, int maxDistance) {
     Map<BlockFace, Block> matches = new HashMap<>();
     for (BlockFace direction : directions()) {
-      Block found = searchDirection(block, direction, maxDistance, match);
+      Block found = searchDirection(block, direction, maxDistance);
       if (found == null) continue;
       matches.put(direction, found);
     }
     return matches;
   }
 
-  public static Block searchDirection(Block block, BlockFace direction, int distance, Function<Block, Boolean> match) {
+  public static Block searchDirection(Block block, BlockFace direction, int distance) {
     if (distance < 1) return null;
     Block neighbor = block.getRelative(direction);
-    if (match.apply(neighbor)) return block;
-    return searchDirection(neighbor, direction, distance - 1, match);
+    if (BeatBlock.interruptSignal(neighbor)) return block;
+    return searchDirection(neighbor, direction, distance - 1);
   }
 
   public void saveWorld() {
@@ -69,8 +78,8 @@ public class BlockManager {
     BeatCraft.debug(String.format("transmuting %s", type));
     BeatBlock beat;
     switch (type) {
-      case "Sequencer": beat = new Sequencer(block); break;
-      case "Send": beat = new Send(block); break;
+      case "Sequencer": beat = new Sequencer(block, this::forwardSignal); break;
+      case "Send": beat = new Send(block,this::forwardSignal); break;
       default:
         BeatCraft.debug(String.format("unknown transmutation: %s", type));
         return;
@@ -80,9 +89,17 @@ public class BlockManager {
 
   private void destroy(Block block, String type) {
     BeatCraft.debug(String.format("breaking %s", type));
-    if (!remove(block)) return;
+    BeatBlock removedBeat = find(block);
+    if (!blocks.remove(removedBeat)) return;
     dropItem(type, block.getLocation());
     block.removeMetadata(BeatBlock.BASE_TYPE, BeatCraft.plugin);
+    // disconnect any sequencers that may have been connected
+    for (BeatBlock beat : blocks) {
+      if (beat instanceof Sequencer) {
+        Sequencer sequencer = (Sequencer) beat;
+        sequencer.disconnect(removedBeat);
+      }
+    }
   }
 
   private void dropItem(String type, Location pos) {
@@ -100,18 +117,16 @@ public class BlockManager {
   // 
   // helpers
 
-  private boolean remove(Block block) {
-    // find the block in the list and remove it
+  private BeatBlock find(Block block) {
     for (BeatBlock beat : blocks) {
       if (beat.getBlock().equals(block)) {
-        blocks.remove(beat);
-        return true;
+        return beat;
       }
     }
-    return false;
+    return null;
   }
 
-  private static Set<BlockFace> directions() {
+  public static Set<BlockFace> directions() {
     return new HashSet<BlockFace>() {{
       add(BlockFace.EAST);
       add(BlockFace.WEST);

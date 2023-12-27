@@ -47,6 +47,7 @@ public class BeatCraft extends JavaPlugin {
 
   // 
   // helpers
+
   public static void debug(String string) {
     log.info(string);
     for (Player player : plugin.getServer().getOnlinePlayers()) {

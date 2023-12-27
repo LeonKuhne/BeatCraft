@@ -1,8 +1,10 @@
 package dev.leonk;
 
+import java.util.function.BiConsumer;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
@@ -14,8 +16,7 @@ public class Send extends BeatBlock {
     BeatCraft.todo.add("rotate sends to change direction");
   }
 
-  public Send(Block block) { super(block, BASE_NAME); }
-  public Send(BeatBlock block) { super(block, BASE_NAME); }
+  public Send(Block block, BiConsumer<Block, BlockFace> forwardSignal) { super(block, BASE_NAME, forwardSignal); }
 
   @Override
   public void tick() {

@@ -2,9 +2,11 @@ package dev.leonk.blocks;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -14,14 +16,13 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-
 import dev.leonk.BeatCraft;
 
 @DatabaseTable(tableName = "send_blocks")
 public class BeatBlock {
   protected static String BASE_TYPE = "beat_block";
   protected static NamespacedKey itemId = new NamespacedKey(BeatCraft.plugin, BASE_TYPE);
-  protected Block block;
+  public Block block;
 
   static {
     BeatCraft.todo.add("have blocks emit particles to indicate their type");
@@ -39,24 +40,42 @@ public class BeatBlock {
   public int z;
   @DatabaseField
   protected String type;
+  protected boolean active;
+  private BlockFace activatedFrom;
+  private BiConsumer<Block, BlockFace> activate;
 
   public BeatBlock() {}
-  public BeatBlock(BeatBlock block, String type) {
-    this(BeatCraft.plugin.getServer().getWorld(block.world).getBlockAt(block.x, block.y, block.z), type);
+  public BeatBlock(BeatBlock block, String type, BiConsumer<Block, BlockFace> activate) {
+    this(BeatCraft.plugin.getServer().getWorld(block.world).getBlockAt(block.x, block.y, block.z), type, activate);
   }
-  public BeatBlock(Block block, String type) {
+  public BeatBlock(Block block, String type, BiConsumer<Block, BlockFace> activate) {
     this.type = type;
     this.block = block;
     this.world = block.getWorld().getName();
     this.x = block.getX();
     this.y = block.getY();
     this.z = block.getZ();
+    this.activate = activate;
+    this.active = true;
+    this.activatedFrom = null;
     block.setMetadata(BASE_TYPE, new FixedMetadataValue(BeatCraft.plugin, type));
   }
 
   public String getName() { return type; }
   public Block getBlock() { return block; }
-  public void tick() {} // overrided
+  public void receiveSignal(BlockFace direction) { 
+    active = true;
+    activatedFrom = direction.getOppositeFace();
+  }
+  public void sendSignal(Block target) { 
+    BlockFace direction = block.getFace(target);
+    if (activatedFrom == direction) return;
+    activate.accept(target, direction); 
+  }
+
+  public void tick() {
+    if (active) { active = false; }
+  } 
 
   public static Block getBlockAt(BeatBlock block) {
     return BeatCraft.plugin.getServer().getWorld(block.world).getBlockAt(block.x, block.y, block.z);
@@ -91,6 +110,10 @@ public class BeatBlock {
     List<MetadataValue> meta = block.getMetadata(BASE_TYPE);
     if (meta.isEmpty()) return null;
     return meta.get(0).asString();
+  }
+
+  protected static boolean interruptSignal(Block block) {
+    return BeatBlock.getType(block) != null;
   }
 
   //

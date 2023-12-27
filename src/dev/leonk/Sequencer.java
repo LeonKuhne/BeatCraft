@@ -3,11 +3,15 @@ package dev.leonk;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.BiConsumer;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Sound;
+import org.bukkit.Note;
+import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.type.NoteBlock;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
@@ -22,13 +26,13 @@ public class Sequencer extends BeatBlock {
     BeatCraft.todo.add("add delay based on the type of block that is put in the line (like weight or something)");
   }
 
-  private boolean active;
-  private Map<BlockFace, Block> playNext; 
+  private Map<BlockFace, Block> playAll;
+  private Map<BlockFace, Block> playNext;
 
-  public Sequencer(Block block) { 
-    super(block, BASE_NAME); 
-    active = true;
+  public Sequencer(Block block, BiConsumer<Block, BlockFace> activate) {
+    super(block, BASE_NAME, activate); 
     playNext = new HashMap<>();
+    playAll = new HashMap<>();
   }
 
   @Override
@@ -37,10 +41,11 @@ public class Sequencer extends BeatBlock {
     if (active) {
       // search for neighboring sends or sequencers
       int maxDistance = 50;
-      Map<BlockFace, Block> matches = BlockManager.searchCross(block, maxDistance, this::interruptSignal);
+      Map<BlockFace, Block> matches = BlockManager.searchCross(block, maxDistance);
       for (Entry<BlockFace, Block> entry : matches.entrySet()) {
         BeatCraft.debug(String.format("sequencer found %s in line", entry.getKey()));
-        playNext.put(entry.getKey(), block.getRelative(entry.getKey()));
+        playAll.put(entry.getKey(), block.getRelative(entry.getKey()));
+        playNext = new HashMap<>(playAll);
       }
       active = false;
       return;
@@ -51,22 +56,59 @@ public class Sequencer extends BeatBlock {
     for (Entry<BlockFace, Block> entry : playNext.entrySet()) {
       Block prev = entry.getValue();
       // stop
-      if (interruptSignal(prev)) { continue; }
+      if (interruptSignal(prev)) { 
+        sendSignal(prev);
+        // reset sequence
+        BlockFace direction =  entry.getKey();
+        nextBlocks.put(direction, playAll.get(direction));
+        continue; 
+      }
       // play
       play(prev);
       // next
       BlockFace direction =  entry.getKey();
       Block next = prev.getRelative(direction);
-      // continue
       nextBlocks.put(direction, next);
     }
+    // continue
     playNext.clear();
     playNext.putAll(nextBlocks);
+    super.tick();
   }
 
-  public void play(Block sample) {
-    if (sample.getType() == Material.AIR) return;
-    block.getWorld().playSound(block.getLocation(), Sound.BLOCK_ANVIL_HIT, 1, 1);
+  public void play(Block step) {
+    if (step.getType() == Material.AIR) return;
+    // play the note of the noteblock 
+    NoteBlock note = (NoteBlock) block.getBlockData(); 
+    block.getWorld().playNote(block.getLocation(), note.getInstrument(), note.getNote());
+    // spawn a particle effect over the block, the same particle effect as the note block note
+    noteParticle(step.getLocation(), note.getNote());
+  }
+
+  private void noteParticle(Location pos, Note note) {
+    pos = pos.add(.5, 1.5, .5);
+    double noteColor = note.getId() / 24D;
+    pos.getWorld().spawnParticle(Particle.NOTE, pos, 0, noteColor, 0, 0, 1);
+    
+  }
+
+  public void disconnect(BeatBlock removedBeat) {
+    Block removedBlock = removedBeat.block;
+    if (playAll.containsValue(removedBlock)) {
+      // remove it
+      for (Entry<BlockFace, Block> entry : playAll.entrySet()) {
+        if (entry.getValue() != removedBlock) continue;
+        playAll.remove(entry.getKey());
+        playNext.remove(entry.getKey());
+        break;
+      }
+    }
+  }
+
+  public void connect(BeatBlock addedBeat) {
+    // check if two of the axis are the same
+
+
   }
 
   public static ItemStack getItem(int amount) {
@@ -80,9 +122,5 @@ public class Sequencer extends BeatBlock {
     recipe.setIngredient('#', Material.NOTE_BLOCK);
     recipe.setIngredient('*', Material.BEETROOT);
     return recipe;
-  }
-  
-  private boolean interruptSignal(Block block) {
-    return BeatBlock.getType(block) != null;
   }
 }
