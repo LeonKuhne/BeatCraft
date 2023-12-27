@@ -56,9 +56,7 @@ public class BeatBlock {
 
   public String getName() { return type; }
   public Block getBlock() { return block; }
-  public void tick() {
-    // override in subclasses
-  }
+  public void tick() {} // overrided
 
   public static Block getBlockAt(BeatBlock block) {
     return BeatCraft.plugin.getServer().getWorld(block.world).getBlockAt(block.x, block.y, block.z);
@@ -94,7 +92,6 @@ public class BeatBlock {
     if (meta.isEmpty()) return null;
     return meta.get(0).asString();
   }
-
 
   //
   // helpers

@@ -28,8 +28,8 @@ public class BlockStore {
   public void load() {
     try {
       BeatCraft.debug(String.format("loading %d blocks", blockTable.countOf()));
-      for (BeatBlock block : blockTable.queryForAll()) {
-        onPlace.accept(BeatBlock.getBlockAt(block), block.type);
+      for (BeatBlock beat : blockTable.queryForAll()) {
+        onPlace.accept(BeatBlock.getBlockAt(beat), beat.type);
       }
     } catch (Exception e) {
       BeatCraft.debug("could not load blocks");
@@ -69,7 +69,4 @@ public class BlockStore {
       e.printStackTrace();
     }
   }
-  
-  // 
-  // helpers
 }

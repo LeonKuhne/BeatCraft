@@ -15,7 +15,6 @@ public class Send extends BeatBlock {
     BeatCraft.todo.add("rotate sends to change direction");
   }
 
-  public Send() {}
   public Send(Block block) { super(block, BASE_NAME); }
   public Send(BeatBlock block) { super(block, BASE_NAME); }
 

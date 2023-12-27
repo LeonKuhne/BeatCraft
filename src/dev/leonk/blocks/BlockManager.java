@@ -1,10 +1,14 @@
 package dev.leonk.blocks;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import dev.leonk.BeatCraft;
@@ -36,6 +40,23 @@ public class BlockManager {
     for (BeatBlock block : blocks) {
       block.tick();
     }
+  }
+
+  public static Map<BlockFace, Block> searchCross(Block block, int maxDistance, Function<Block, Boolean> match) {
+    Map<BlockFace, Block> matches = new HashMap<>();
+    for (BlockFace direction : BlockFace.values()) {
+      Block found = searchDirection(block, direction, maxDistance, match);
+      if (found == null) continue;
+      matches.put(direction, found);
+    }
+    return matches;
+  }
+
+  public static Block searchDirection(Block block, BlockFace direction, int distance, Function<Block, Boolean> match) {
+    if (distance < 1) return null;
+    Block neighbor = block.getRelative(direction);
+    if (match.apply(neighbor)) return block;
+    return searchDirection(neighbor, direction, distance - 1, match);
   }
 
   public void saveWorld() {
