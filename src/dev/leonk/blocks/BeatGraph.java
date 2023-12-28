@@ -137,6 +137,8 @@ public class BeatGraph {
       if (edgePassingBack == null) continue;
       edgePassingBack.connect();
     }
+    // remove from state
+    state.removeIf(edge -> edge.to.equals(node));
   }
 
   public Map<BlockFace, Edge> sameAxis(Node node) {
@@ -154,7 +156,7 @@ public class BeatGraph {
     // find shortest connections
     Map<BlockFace, Edge> closest = new HashMap<>();
     for (Node targetNode : aligned) {
-      BlockFace direction = direction(block, node.beat.getBlock());
+      BlockFace direction = direction(block, targetNode.beat.getBlock());
       Edge edge = new Edge(node, targetNode, direction);
       Edge closestEdge = closest.get(edge.direction);
       if (closestEdge != null && closestEdge.distance < edge.distance) continue;
@@ -181,7 +183,8 @@ public class BeatGraph {
 
   public Set<Edge> activate(Edge edge) { 
     Set<Edge> connections = activate(edge.to); 
-    connections.remove(edge.reverse());
+    // remove the edge that triggered this activation
+    //connections.remove(edge.reverse());
     return connections;
   }
   public Set<Edge> activate(Node node) { 
@@ -194,7 +197,9 @@ public class BeatGraph {
     // activate send
     } else if (beat instanceof Send) {
       // find next edges
-      for (Edge edge : collectNext(node, n -> !(n.beat instanceof Send))) {
+      for (Edge edge : collectNext(node, n -> !(n.beat instanceof Sequencer || n.beat instanceof Send))) {
+        // filter out sends
+        if (edge.from.beat instanceof Send) continue;
         // tick next edges
         activated.addAll(propogate(edge));
       }
