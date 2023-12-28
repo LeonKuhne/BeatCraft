@@ -1,26 +1,24 @@
 package dev.leonk;
 
-import java.util.function.BiConsumer;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import dev.leonk.blocks.BeatBlock;
+import dev.leonk.blocks.BeatGraph.Edge;
 
 public class Send extends BeatBlock {
   public static String BASE_NAME = "Send";
-  static {
-    BeatCraft.todo.add("rotate sends to change direction");
-  }
 
-  public Send(Block block, BiConsumer<Block, BlockFace> forwardSignal) { super(block, BASE_NAME, forwardSignal); }
+  public Send(Block block) { super(block, BASE_NAME); }
 
   @Override
-  public void tick() {
-    //block.getWorld().playSound(block.getLocation(), Sound.BLOCK_AZALEA_STEP, 1, 1);
+  public void trigger(Edge edge) {
+    block.getWorld().playSound(block.getLocation(), Sound.BLOCK_BARREL_OPEN, 1, 1);
+    super.trigger(edge);
   }
 
   public static ItemStack getItem(int amount) {

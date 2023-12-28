@@ -1,8 +1,11 @@
 package dev.leonk.blocks;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.function.BiConsumer;
+import java.util.Map;
+import java.util.Set;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -17,16 +20,13 @@ import org.bukkit.persistence.PersistentDataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import dev.leonk.BeatCraft;
+import dev.leonk.blocks.BeatGraph.Edge;
 
 @DatabaseTable(tableName = "send_blocks")
 public class BeatBlock {
   protected static String BASE_TYPE = "beat_block";
   protected static NamespacedKey itemId = new NamespacedKey(BeatCraft.plugin, BASE_TYPE);
-  public Block block;
-
-  static {
-    BeatCraft.todo.add("have blocks emit particles to indicate their type");
-  }
+  protected Block block;
 
   @DatabaseField(generatedId = true)
   private int id;
@@ -40,42 +40,25 @@ public class BeatBlock {
   public int z;
   @DatabaseField
   protected String type;
-  protected boolean active;
-  private BlockFace activatedFrom;
-  private BiConsumer<Block, BlockFace> activate;
 
   public BeatBlock() {}
-  public BeatBlock(BeatBlock block, String type, BiConsumer<Block, BlockFace> activate) {
-    this(BeatCraft.plugin.getServer().getWorld(block.world).getBlockAt(block.x, block.y, block.z), type, activate);
+  public BeatBlock(BeatBlock block, String type) {
+    this(BeatCraft.plugin.getServer().getWorld(block.world).getBlockAt(block.x, block.y, block.z), type);
   }
-  public BeatBlock(Block block, String type, BiConsumer<Block, BlockFace> activate) {
+  public BeatBlock(Block block, String type) {
     this.type = type;
     this.block = block;
     this.world = block.getWorld().getName();
     this.x = block.getX();
     this.y = block.getY();
     this.z = block.getZ();
-    this.activate = activate;
-    this.active = true;
-    this.activatedFrom = null;
     block.setMetadata(BASE_TYPE, new FixedMetadataValue(BeatCraft.plugin, type));
   }
 
   public String getName() { return type; }
   public Block getBlock() { return block; }
-  public void receiveSignal(BlockFace direction) { 
-    active = true;
-    activatedFrom = direction.getOppositeFace();
-  }
-  public void sendSignal(Block target) { 
-    BlockFace direction = block.getFace(target);
-    if (activatedFrom == direction) return;
-    activate.accept(target, direction); 
-  }
-
-  public void tick() {
-    if (active) { active = false; }
-  } 
+  public void stimulate(Edge edge) {}
+  public void trigger(Edge edge) {}
 
   public static Block getBlockAt(BeatBlock block) {
     return BeatCraft.plugin.getServer().getWorld(block.world).getBlockAt(block.x, block.y, block.z);
@@ -119,12 +102,45 @@ public class BeatBlock {
   //
   // helpers
 
+  public static Map<BlockFace, Block> searchCross(Block block, int maxDistance) {
+    Map<BlockFace, Block> matches = new HashMap<>();
+    for (BlockFace direction : directions()) {
+      Block found = searchDirection(block, direction, maxDistance);
+      if (found == null) continue;
+      matches.put(direction, found);
+    }
+    return matches;
+  }
+
+  public static Block searchDirection(Block block, BlockFace direction, int distance) {
+    if (distance < 1) return null;
+    Block neighbor = block.getRelative(direction);
+    if (BeatBlock.interruptSignal(neighbor)) return block;
+    return searchDirection(neighbor, direction, distance - 1);
+  }
+
+  public static Set<BlockFace> directions() {
+    return new HashSet<BlockFace>() {{
+      add(BlockFace.EAST);
+      add(BlockFace.WEST);
+      add(BlockFace.UP);
+      add(BlockFace.DOWN);
+      add(BlockFace.NORTH);
+      add(BlockFace.SOUTH);
+    }};
+  }
+
   @Override
   public int hashCode() { return block.hashCode(); }
-  @Override
+
   public boolean equals(Object other) { 
     if (other instanceof Block) return block.equals(other);
     if (!(other instanceof BeatBlock)) return false;
     return block.equals(((BeatBlock) other).block); 
+  }
+
+  @Override
+  public String toString() {
+    return String.format("%s(%d, %d, %d)", type, x, y, z);
   }
 }

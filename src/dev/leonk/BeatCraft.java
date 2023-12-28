@@ -13,7 +13,7 @@ public class BeatCraft extends JavaPlugin {
 
   public static Logger log;
   public static JavaPlugin plugin;
-  public static List<String> todo = new ArrayList<>();
+  public static List<String> todo;
   public static BlockManager blockManager;
 
   // 
@@ -24,6 +24,15 @@ public class BeatCraft extends JavaPlugin {
     plugin = this;
     log = getLogger();
     blockManager = new BlockManager();
+    todo = new ArrayList<>();
+
+    todo.add("trigger signal on punch");
+    todo.add("rotate sends to change their direction and make texture directional");
+    todo.add("stop sequencers when connections are broken");
+    todo.add("add delay based on the type of block that is put in the line");
+    todo.add("change pitch based on the type of block that is put in the line (up or down)");
+    todo.add("right click sequencer to change speed, indicate using color/pitch/something");
+    todo.add("create special sequencers that only play on air and only delays through blocks");
   }
 
   @Override
