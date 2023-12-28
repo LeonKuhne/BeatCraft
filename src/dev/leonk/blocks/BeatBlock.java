@@ -59,7 +59,7 @@ public class BeatBlock {
   public Block getBlock() { return block; }
   public void stimulate(Edge edge) {}
   public void trigger(Node node) {
-    block.getWorld().spawnParticle(Particle.END_ROD, block.getLocation().add(0.5, 1.5, 0.5), 1);
+    block.getWorld().spawnParticle(Particle.FLAME, block.getLocation().add(0.5, 1.5, 0.5), 1, 0, 0, 0, 0);
   }
 
   public static Block getBlockAt(BeatBlock block) {

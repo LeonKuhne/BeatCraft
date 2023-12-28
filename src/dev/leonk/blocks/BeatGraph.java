@@ -97,6 +97,7 @@ public class BeatGraph {
 
   public void propogate() {
     Set<Edge> nextState = new HashSet<>();
+    BeatCraft.debug(String.format("propogating %d edges", state.size()));
     for (Edge edge : state) {
       nextState.addAll(propogate(edge));
     }
@@ -104,6 +105,7 @@ public class BeatGraph {
   }
 
   public Set<Edge> propogate(Edge edge) {
+    BeatCraft.debug(String.format("propogating %s", edge));
     // activate if signal arrived
     if (edge.distance == 1 || edge.from.beat instanceof Send) {
       return activate(edge);
@@ -185,11 +187,10 @@ public class BeatGraph {
   public Set<Edge> activate(Node node) { 
     BeatBlock beat = node.beat;
     beat.trigger(node);
-    Map<BlockFace,Edge> connections = sameAxis(node);
     Set<Edge> activated = new HashSet<>();
     // activate sequencer
     if (beat instanceof Sequencer) {
-      for (Edge edge : connections.values()) activated.add(edge);
+      for (Edge edge : node.connections.values()) activated.add(edge.clone());
     // activate send
     } else if (beat instanceof Send) {
       // find next edges
@@ -208,7 +209,7 @@ public class BeatGraph {
     // collect new edges
     Set<Edge> collected = new HashSet<>();
     for (Edge edge : node.connections.values()) {
-      collected.add(edge);
+      collected.add(edge.clone());
       collected.addAll(collectNext(edge.to, stopSearch, visited));
     }
     return collected;
