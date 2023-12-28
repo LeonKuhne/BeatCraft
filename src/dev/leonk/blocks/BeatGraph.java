@@ -29,6 +29,13 @@ public class BeatGraph {
       }
       return builder.toString();
     }
+    @Override
+    public boolean equals(Object other) {
+      if (other == null) return false;
+      if (!(other instanceof Node)) return false;
+      Node otherNode = (Node) other;
+      return otherNode.beat.equals(beat);
+    }
   }
 
   public class Edge {
@@ -63,10 +70,15 @@ public class BeatGraph {
     @Override
     public String toString() { 
       StringBuilder builder = new StringBuilder();
-      builder.append(String.format("Edge(%d @ %s)", distance, direction));
-      builder.append(String.format("\n--> %s", from.beat));
-      builder.append(String.format("\n<-- %s", to.beat));
+      builder.append(String.format("Edge(%d @ %s) %s --> %s", distance, direction, from.beat, to.beat));
       return builder.toString();
+    }
+    @Override
+    public boolean equals(Object other) {
+      if (other == null) return false;
+      if (!(other instanceof Edge)) return false;
+      Edge otherEdge = (Edge) other;
+      return otherEdge.from.equals(from) && otherEdge.to.equals(to) && otherEdge.direction.equals(direction);
     }
   }
   
@@ -78,20 +90,28 @@ public class BeatGraph {
     state = new HashSet<>();
   }
 
+  public void trigger(Node node) {
+    // decide if you should add-to or replace the state?
+    state.addAll(activate(node));
+  }
+
   public void propogate() {
     Set<Edge> nextState = new HashSet<>();
     for (Edge edge : state) {
-      // activate if arrived or a send
-      if (edge.distance == 0 || edge.from.beat instanceof Send) {
-        nextState.addAll(activate(edge));
-        continue;
-      }
-      // decrease the distance
-      edge.distance--;
-      edge.from.beat.stimulate(edge);
-      nextState.add(edge);
+      nextState.addAll(propogate(edge));
     }
     state = nextState;
+  }
+
+  public Set<Edge> propogate(Edge edge) {
+    // activate if signal arrived
+    if (edge.distance == 1 || edge.from.beat instanceof Send) {
+      return activate(edge);
+    }
+      // decrease the distance
+    edge.distance--;
+    edge.from.beat.stimulate(edge);
+    return new HashSet<Edge>() {{ add(edge); }};
   }
 
   public void connect(BeatBlock newBlock) {
@@ -158,20 +178,40 @@ public class BeatGraph {
   }
 
   public Set<Edge> activate(Edge edge) { 
-    Node node = edge.to;
+    Set<Edge> connections = activate(edge.to); 
+    connections.remove(edge.reverse());
+    return connections;
+  }
+  public Set<Edge> activate(Node node) { 
     BeatBlock beat = node.beat;
-    // trigger block
-    beat.trigger(edge);
-    // stop if not a sequencer or send
-    if (!(beat instanceof Sequencer) && !(beat instanceof Send)) return new HashSet<>();
-    // activate next edges
-    Set<Edge> newEdges = new HashSet<>();
-    for (Edge nextEdge : node.connections.values()) {
-      // ignore the connection going back
-      if (edge.direction == nextEdge.direction.getOppositeFace()) continue;
-      newEdges.add(nextEdge.clone());
+    beat.trigger(node);
+    Map<BlockFace,Edge> connections = sameAxis(node);
+    Set<Edge> activated = new HashSet<>();
+    // activate sequencer
+    if (beat instanceof Sequencer) {
+      for (Edge edge : connections.values()) activated.add(edge);
+    // activate send
+    } else if (beat instanceof Send) {
+      // find next edges
+      for (Edge edge : collectNext(node, n -> !(n.beat instanceof Send))) {
+        // tick next edges
+        activated.addAll(propogate(edge));
+      }
     }
-    return newEdges;
+    return activated;
+  }
+
+  public Set<Edge> collectNext(Node node, Function<Node, Boolean> stopSearch) { return collectNext(node, stopSearch, new HashSet<>()); }
+  public Set<Edge> collectNext(Node node, Function<Node, Boolean> stopSearch, Set<Node> visited) {
+    if (visited.contains(node) || stopSearch.apply(node)) return new HashSet<>();
+    visited.add(node);
+    // collect new edges
+    Set<Edge> collected = new HashSet<>();
+    for (Edge edge : node.connections.values()) {
+      collected.add(edge);
+      collected.addAll(collectNext(edge.to, stopSearch, visited));
+    }
+    return collected;
   }
 
   public Set<BeatBlock> blocks() {

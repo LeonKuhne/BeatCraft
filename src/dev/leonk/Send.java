@@ -1,36 +1,34 @@
 package dev.leonk;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
-import org.bukkit.inventory.ShapedRecipe;
 import dev.leonk.blocks.BeatBlock;
-import dev.leonk.blocks.BeatGraph.Edge;
 
 public class Send extends BeatBlock {
   public static String BASE_NAME = "Send";
 
   public Send(Block block) { super(block, BASE_NAME); }
 
-  @Override
-  public void trigger(Edge edge) {
-    block.getWorld().playSound(block.getLocation(), Sound.BLOCK_BARREL_OPEN, 1, 1);
-    super.trigger(edge);
-  }
-
   public static ItemStack getItem(int amount) {
     return getItem("Send", "forward audio signals", Material.NOTE_BLOCK, amount);
   }
 
-  public static Recipe craftRecipe() {
-    NamespacedKey key = new NamespacedKey(BeatCraft.plugin, "craft-send");
-    ShapedRecipe recipe = new ShapedRecipe(key, getItem(1)); 
-    recipe.shape("###", "#o#", "###");
-    recipe.setIngredient('#', Material.NOTE_BLOCK);
-    recipe.setIngredient('o', Material.ENDER_PEARL);
-    return recipe;
+  public static ItemStack craftShapeless(Set<ItemStack> ingredients) {
+    return uncraft(ingredients, BASE_NAME, new ItemStack(Material.NOTE_BLOCK, 8));
+  }
+
+  public static ItemStack craftShaped(ItemStack[] ingredients) {
+    Map<String, Material> map = new HashMap<String, Material>() {{
+      put("#", Material.NOTE_BLOCK);
+      put("*", Material.BEETROOT);
+    }};
+
+    // 8 note blocks surrounding 1 beetroot
+    if (BeatBlock.recipeMatch("####*####", ingredients, map)) return getItem(1);
+    return null;
   }
 }

@@ -1,16 +1,15 @@
 package dev.leonk.blocks;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Particle;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -21,6 +20,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import dev.leonk.BeatCraft;
 import dev.leonk.blocks.BeatGraph.Edge;
+import dev.leonk.blocks.BeatGraph.Node;
 
 @DatabaseTable(tableName = "send_blocks")
 public class BeatBlock {
@@ -58,7 +58,9 @@ public class BeatBlock {
   public String getName() { return type; }
   public Block getBlock() { return block; }
   public void stimulate(Edge edge) {}
-  public void trigger(Edge edge) {}
+  public void trigger(Node node) {
+    block.getWorld().spawnParticle(Particle.END_ROD, block.getLocation().add(0.5, 1.5, 0.5), 1);
+  }
 
   public static Block getBlockAt(BeatBlock block) {
     return BeatCraft.plugin.getServer().getWorld(block.world).getBlockAt(block.x, block.y, block.z);
@@ -95,44 +97,24 @@ public class BeatBlock {
     return meta.get(0).asString();
   }
 
-  protected static boolean interruptSignal(Block block) {
-    return BeatBlock.getType(block) != null;
+  public static ItemStack uncraft(Set<ItemStack> ingredients, String type, ItemStack result) {
+    // 1 sequencer -> 8 note blocks
+    if (ingredients.size() == 1) {
+      ItemStack item = ingredients.iterator().next(); 
+      if (BeatBlock.getType(item).equals(type)) {
+        return result;
+      }
+    }
+    return null;
   }
 
   //
   // helpers
 
-  public static Map<BlockFace, Block> searchCross(Block block, int maxDistance) {
-    Map<BlockFace, Block> matches = new HashMap<>();
-    for (BlockFace direction : directions()) {
-      Block found = searchDirection(block, direction, maxDistance);
-      if (found == null) continue;
-      matches.put(direction, found);
-    }
-    return matches;
-  }
-
-  public static Block searchDirection(Block block, BlockFace direction, int distance) {
-    if (distance < 1) return null;
-    Block neighbor = block.getRelative(direction);
-    if (BeatBlock.interruptSignal(neighbor)) return block;
-    return searchDirection(neighbor, direction, distance - 1);
-  }
-
-  public static Set<BlockFace> directions() {
-    return new HashSet<BlockFace>() {{
-      add(BlockFace.EAST);
-      add(BlockFace.WEST);
-      add(BlockFace.UP);
-      add(BlockFace.DOWN);
-      add(BlockFace.NORTH);
-      add(BlockFace.SOUTH);
-    }};
-  }
-
   @Override
   public int hashCode() { return block.hashCode(); }
 
+  @Override
   public boolean equals(Object other) { 
     if (other instanceof Block) return block.equals(other);
     if (!(other instanceof BeatBlock)) return false;
@@ -142,5 +124,23 @@ public class BeatBlock {
   @Override
   public String toString() {
     return String.format("%s(%d, %d, %d)", type, x, y, z);
+  }
+
+  protected static boolean recipeMatch(String pattern, ItemStack[] ingredients, Map<String, Material> mapping) {
+    if (pattern.length() != ingredients.length) return false;
+    return eachMapping(pattern, ingredients, (symbol, item) -> {
+      Material material = mapping.get(String.valueOf(symbol));
+      return material == item.getType();
+    }, 0);
+  }
+
+  protected static boolean eachMapping(String pattern, ItemStack[] ingredients, BiFunction<String, ItemStack, Boolean> filter, int cursor) {
+    if (cursor == pattern.length()) return true;
+    // find next
+    String symbol = pattern.substring(cursor, cursor + 1); 
+    ItemStack ingredient = ingredients[cursor];
+    // check filter
+    if (!filter.apply(symbol, ingredient)) return false;
+    return eachMapping(pattern, ingredients, filter, cursor + 1);
   }
 }
