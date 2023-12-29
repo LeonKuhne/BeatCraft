@@ -53,6 +53,7 @@ public class BlockManager {
   }
 
   private ItemStack craft(ItemStack[] ingredients) {
+    BeatCraft.debug(String.format("crafting with %d ingredients", ingredients.length));
     // assemble ingredients
     Set<ItemStack> unshapedIngredients = new HashSet<ItemStack>();
     for (ItemStack item : ingredients) if (item != null) unshapedIngredients.add(item);

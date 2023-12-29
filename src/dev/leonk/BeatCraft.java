@@ -26,9 +26,9 @@ public class BeatCraft extends JavaPlugin {
     blockManager = new BlockManager();
     todo = new ArrayList<>();
 
-    todo.add("trigger signal on punch");
-    todo.add("rotate sends to change their direction and make texture directional");
     todo.add("stop sequencers when connections are broken");
+    todo.add("rotate sends to change their direction and make texture directional");
+    todo.add("fix recipe deduction glitch");
     todo.add("add delay based on the type of block that is put in the line");
     todo.add("change pitch based on the type of block that is put in the line (up or down)");
     todo.add("right click sequencer to change speed, indicate using color/pitch/something");

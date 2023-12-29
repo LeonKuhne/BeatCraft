@@ -10,8 +10,9 @@ import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
-import org.bukkit.event.inventory.InventoryType.SlotType;
+import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.world.WorldSaveEvent;
+import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
 
 public class BlockListener implements Listener {
@@ -58,13 +59,26 @@ public class BlockListener implements Listener {
   }
 
   @EventHandler
-  public void onCraftItem(CraftItemEvent event) {
-    if (event.getSlotType() != SlotType.RESULT) return;
-    ItemStack result = event.getRecipe().getResult();
-    if (result == null || result.getType().isAir()) {
-      result = onCraft.apply(event.getInventory().getMatrix());
-      event.setCurrentItem(result);
+  public void onCraft(PrepareItemCraftEvent event) {
+    if (event.getRecipe() != null) return;
+    CraftingInventory inv = event.getInventory();
+    ItemStack result = onCraft.apply(inv.getMatrix());
+    if (result == null) return;
+    inv.setResult(result);
+  }
+
+  @EventHandler
+  public void onCraftResult(CraftItemEvent event) {
+    if (event.getRecipe() == null) return;
+    if (BeatBlock.getType(event.getCurrentItem()) == null) return;
+    // subtract one from all ingredients
+    CraftingInventory inv = event.getInventory();
+    for (ItemStack ingredient : inv.getMatrix()) {
+      if (ingredient == null) continue;
+      if (ingredient.getAmount() == 0) continue;
+      ingredient.setAmount(ingredient.getAmount() - 1);
     }
+    //event.setCancelled(true);
   }
 
   @EventHandler

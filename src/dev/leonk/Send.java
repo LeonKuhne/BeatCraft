@@ -24,11 +24,11 @@ public class Send extends BeatBlock {
   public static ItemStack craftShaped(ItemStack[] ingredients) {
     Map<String, Material> map = new HashMap<String, Material>() {{
       put("#", Material.NOTE_BLOCK);
-      put("*", Material.BEETROOT);
+      put("o", Material.ENDER_PEARL);
     }};
 
     // 8 note blocks surrounding 1 beetroot
-    if (BeatBlock.recipeMatch("####*####", ingredients, map)) return getItem(1);
+    if (BeatBlock.recipeMatch("####o####", ingredients, map)) return getItem(1);
     return null;
   }
 }

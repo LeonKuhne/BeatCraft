@@ -9,7 +9,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import dev.leonk.BeatCraft;
 import dev.leonk.Send;
-import dev.leonk.Sequencer;
 
 public class BeatGraph {
 
@@ -80,6 +79,10 @@ public class BeatGraph {
       Edge otherEdge = (Edge) other;
       return otherEdge.from.equals(from) && otherEdge.to.equals(to) && otherEdge.direction.equals(direction);
     }
+    @Override 
+    public int hashCode() {
+      return from.hashCode() + to.hashCode() + direction.hashCode();
+    }
   }
   
   public Set<Node> nodes;
@@ -92,11 +95,14 @@ public class BeatGraph {
 
   public void trigger(Node node) {
     // decide if you should add-to or replace the state?
-    state.addAll(activate(node));
+    for (Edge edge : node.connections.values()) {
+      state.add(edge.clone());
+    }
   }
 
   public void propogate() {
     Set<Edge> nextState = new HashSet<>();
+    if (state.size() == 0) return;
     BeatCraft.debug(String.format("propogating %d edges", state.size()));
     for (Edge edge : state) {
       nextState.addAll(propogate(edge));
@@ -104,16 +110,31 @@ public class BeatGraph {
     state = nextState;
   }
 
-  public Set<Edge> propogate(Edge edge) {
+  public Set<Edge> propogate(Edge edge) { return propogate(edge, new HashSet<>()); }
+  public Set<Edge> propogate(Edge edge, Set<Edge> visited) {
+    if (visited.contains(edge)) return new HashSet<>();
+    visited.add(edge);
+
     BeatCraft.debug(String.format("propogating %s", edge));
     // activate if signal arrived
+    Set<Edge> activated = new HashSet<>();
     if (edge.distance == 1 || edge.from.beat instanceof Send) {
-      return activate(edge);
+      edge.to.beat.trigger();
+
+      // forward signal if send
+      for (Edge nextEdge : edge.to.connections.values()) {
+        if (nextEdge.to.equals(edge.from)) continue;
+        // add connections
+        activated.addAll(propogate(nextEdge.clone(), visited));
+      }
+      return activated;
     }
-      // decrease the distance
+
+    // decrease the distance
     edge.distance--;
     edge.from.beat.stimulate(edge);
-    return new HashSet<Edge>() {{ add(edge); }};
+    activated.add(edge);
+    return activated;
   }
 
   public void connect(BeatBlock newBlock) {
@@ -181,41 +202,15 @@ public class BeatGraph {
     return null;
   }
 
-  public Set<Edge> activate(Edge edge) { 
-    Set<Edge> connections = activate(edge.to); 
-    // remove the edge that triggered this activation
-    //connections.remove(edge.reverse());
-    return connections;
-  }
-  public Set<Edge> activate(Node node) { 
-    BeatBlock beat = node.beat;
-    beat.trigger(node);
-    Set<Edge> activated = new HashSet<>();
-    // activate sequencer
-    if (beat instanceof Sequencer) {
-      for (Edge edge : node.connections.values()) activated.add(edge.clone());
-    // activate send
-    } else if (beat instanceof Send) {
-      // find next edges
-      for (Edge edge : collectNext(node, n -> !(n.beat instanceof Sequencer || n.beat instanceof Send))) {
-        // filter out sends
-        if (edge.from.beat instanceof Send) continue;
-        // tick next edges
-        activated.addAll(propogate(edge));
-      }
-    }
-    return activated;
-  }
-
-  public Set<Edge> collectNext(Node node, Function<Node, Boolean> stopSearch) { return collectNext(node, stopSearch, new HashSet<>()); }
-  public Set<Edge> collectNext(Node node, Function<Node, Boolean> stopSearch, Set<Node> visited) {
-    if (visited.contains(node) || stopSearch.apply(node)) return new HashSet<>();
+  public Set<Edge> collectNext(Node node, Function<Node, Boolean> filter) { return collectNext(node, filter, new HashSet<>()); }
+  public Set<Edge> collectNext(Node node, Function<Node, Boolean> filter, Set<Node> visited) {
+    if (visited.contains(node) || !(filter.apply(node))) return new HashSet<>();
     visited.add(node);
     // collect new edges
     Set<Edge> collected = new HashSet<>();
     for (Edge edge : node.connections.values()) {
-      collected.add(edge.clone());
-      collected.addAll(collectNext(edge.to, stopSearch, visited));
+      collected.add(edge);
+      collected.addAll(collectNext(edge.to, filter, visited));
     }
     return collected;
   }

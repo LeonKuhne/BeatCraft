@@ -53,11 +53,11 @@ public class Sequencer extends BeatBlock {
   public static ItemStack craftShaped(ItemStack[] ingredients) {
     Map<String, Material> map = new HashMap<String, Material>() {{
       put("#", Material.NOTE_BLOCK);
-      put("o", Material.ENDER_PEARL);
+      put("x", Material.BEETROOT);
     }};
 
     // 8 note blocks surrounding 1 beetroot
-    if (BeatBlock.recipeMatch("####o####", ingredients, map)) return getItem(1);
+    if (BeatBlock.recipeMatch("####x####", ingredients, map)) return getItem(1);
     return null;
   }
 }

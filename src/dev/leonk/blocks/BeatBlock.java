@@ -20,7 +20,6 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import dev.leonk.BeatCraft;
 import dev.leonk.blocks.BeatGraph.Edge;
-import dev.leonk.blocks.BeatGraph.Node;
 
 @DatabaseTable(tableName = "send_blocks")
 public class BeatBlock {
@@ -58,7 +57,7 @@ public class BeatBlock {
   public String getName() { return type; }
   public Block getBlock() { return block; }
   public void stimulate(Edge edge) {}
-  public void trigger(Node node) {
+  public void trigger() {
     block.getWorld().spawnParticle(Particle.FLAME, block.getLocation().add(0.5, 1.5, 0.5), 1, 0, 0, 0, 0);
   }
 
@@ -101,7 +100,7 @@ public class BeatBlock {
     // 1 sequencer -> 8 note blocks
     if (ingredients.size() == 1) {
       ItemStack item = ingredients.iterator().next(); 
-      if (BeatBlock.getType(item).equals(type)) {
+      if (type.equals(BeatBlock.getType(item))) {
         return result;
       }
     }
@@ -129,6 +128,7 @@ public class BeatBlock {
   protected static boolean recipeMatch(String pattern, ItemStack[] ingredients, Map<String, Material> mapping) {
     if (pattern.length() != ingredients.length) return false;
     return eachMapping(pattern, ingredients, (symbol, item) -> {
+      if (item == null) return false;
       Material material = mapping.get(String.valueOf(symbol));
       return material == item.getType();
     }, 0);
