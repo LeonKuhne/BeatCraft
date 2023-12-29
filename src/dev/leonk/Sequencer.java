@@ -26,16 +26,17 @@ public class Sequencer extends BeatBlock {
   public void stimulate(Edge edge) {
     Block cursor = edge.cursor();
 
-    play(cursor);
-
-    // turn pitch up on netherrack
-    if (cursor.getType() == Material.NETHERRACK) {
+    // turn pitch up on dirt
+    if (cursor.getType() == Material.DIRT) {
       changePitchBy(blockHeight(cursor));
 
-    // turn pitch down on cobblestone
-    } else if (cursor.getType() == Material.DIRT) {
+    // turn pitch down on netherrack
+    } else if (cursor.getType() == Material.NETHERRACK) {
       changePitchBy(blockHeight(cursor) * -1);
     }
+
+    // play sound
+    play(cursor);
   }
 
   public void play(Block step) {
