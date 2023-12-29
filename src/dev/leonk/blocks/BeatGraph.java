@@ -123,6 +123,7 @@ public class BeatGraph {
 
       // forward signal if send
       for (Edge nextEdge : edge.to.connections.values()) {
+        // dont return signal
         if (nextEdge.to.equals(edge.from)) continue;
         // add connections
         activated.addAll(propogate(nextEdge.clone(), visited));

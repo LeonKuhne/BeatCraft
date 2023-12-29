@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.Note;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.NoteBlock;
 import org.bukkit.inventory.ItemStack;
 import dev.leonk.blocks.BeatBlock;
@@ -23,7 +24,18 @@ public class Sequencer extends BeatBlock {
 
   @Override
   public void stimulate(Edge edge) {
-    play(edge.cursor());
+    Block cursor = edge.cursor();
+
+    play(cursor);
+
+    // turn pitch up on netherrack
+    if (cursor.getType() == Material.NETHERRACK) {
+      changePitchBy(blockHeight(cursor));
+
+    // turn pitch down on cobblestone
+    } else if (cursor.getType() == Material.DIRT) {
+      changePitchBy(blockHeight(cursor) * -1);
+    }
   }
 
   public void play(Block step) {
@@ -59,5 +71,16 @@ public class Sequencer extends BeatBlock {
     // 8 note blocks surrounding 1 beetroot
     if (BeatBlock.recipeMatch("####x####", ingredients, map)) return getItem(1);
     return null;
+  }
+
+  private void changePitchBy(int delta) {
+    NoteBlock noteBlock = (NoteBlock) block.getBlockData();
+    noteBlock.setNote(new Note((byte) ((noteBlock.getNote().getId() + delta + 24) % 24)));
+    block.setBlockData(noteBlock);
+  }
+
+  private int blockHeight(Block cursor) {
+    if (cursor.getType() == Material.AIR) return 0;
+    return blockHeight(cursor.getRelative(BlockFace.UP)) + 1;
   }
 }
