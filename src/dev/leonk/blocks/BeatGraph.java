@@ -115,7 +115,6 @@ public class BeatGraph {
     if (visited.contains(edge)) return new HashSet<>();
     visited.add(edge);
 
-    BeatCraft.debug(String.format("propogating %s", edge));
     // activate if signal arrived
     Set<Edge> activated = new HashSet<>();
     if (edge.distance == 1 || edge.from.beat instanceof Send) {
