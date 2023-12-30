@@ -120,13 +120,15 @@ public class BeatBlock {
   // helpers
 
   @Override
-  public int hashCode() { return block.hashCode(); }
+  public int hashCode() { 
+    return block.getLocation().hashCode() + type.hashCode();
+  }
 
   @Override
   public boolean equals(Object other) { 
     if (other instanceof Block) return block.equals(other);
     if (!(other instanceof BeatBlock)) return false;
-    return block.equals(((BeatBlock) other).block); 
+    return block.getLocation().equals(((BeatBlock) other).block.getLocation()) && type.equals(((BeatBlock) other).type);
   }
 
   @Override

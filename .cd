@@ -20,7 +20,7 @@ function upload() {
 
 function test() {
   upload
-  (cd test && ./start.sh)
+  start
 }
 
 function dev() {
@@ -28,4 +28,25 @@ function dev() {
   echo "restarting... ctrl+C to cancel"
   sleep 1
   dev
+}
+
+function start() {
+  if [ ! -d "test" ]; then; err "Expected test server directory 'test'" && return; fi
+  (cd test && java -Xms1G -Xmx1G -XX:+UseG1GC -jar spigot.jar nogui)
+}
+
+function update() {
+  if [ -z "$1" ]; then
+    err "usage: update <minecraft version (eg 1.20.4)>"
+  fi
+  if [ ! -d "test" ]; then; mkdir test; fi
+
+  (
+    cd test
+    if [ ! -f "BuildTools.jar" ]; then; wget https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar; fi
+    java -jar BuildTools.jar --rev $1
+    mv spigot-*.jar spigot.jar
+  )
+
+  start
 }

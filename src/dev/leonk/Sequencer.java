@@ -3,7 +3,6 @@ package dev.leonk;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Note;
@@ -35,7 +34,9 @@ public class Sequencer extends BeatBlock {
     }
 
     // spawn a note particle over the cursor
-    noteParticle(getNote(cursor).getNote(), cursor.getLocation());
+    NoteBlock note = getNote(cursor);
+    if (note == null) return;
+    noteParticle(note.getNote(), cursor.getLocation());
   }
 
   public void play(Block step) { play(step, block.getLocation()); }
@@ -51,7 +52,7 @@ public class Sequencer extends BeatBlock {
   }
 
   public static ItemStack getItem(int amount) {
-    return BeatBlock.getItem("Sequencer", "right click to change speed", Material.NOTE_BLOCK, amount);
+    return BeatBlock.getItem("Sequencer", "right click to change pitch", Material.NOTE_BLOCK, amount);
   }
 
   public static ItemStack craftShapeless(Set<ItemStack> ingredients) {

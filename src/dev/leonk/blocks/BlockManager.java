@@ -17,9 +17,9 @@ import dev.leonk.blocks.graph.Node;
 import dev.leonk.Send;
 
 public class BlockManager {
+  public Graph graph;
   private BlockListener blockUpdates;
   private BlockStore blockStorage;
-  private Graph graph;
   private ArrayList<BiFunction<ItemStack[], Set<ItemStack>, ItemStack>> recipes;
 
   public BlockManager() {

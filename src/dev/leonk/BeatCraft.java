@@ -1,6 +1,5 @@
 package dev.leonk;
 
-import java.util.List;
 import java.util.logging.Logger;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -12,7 +11,6 @@ public class BeatCraft extends JavaPlugin {
 
   public static Logger log;
   public static JavaPlugin plugin;
-  public static List<String> todo;
   public static BlockManager blockManager;
 
   // 
@@ -37,11 +35,15 @@ public class BeatCraft extends JavaPlugin {
 
   @Override
   public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-    sender.sendMessage("Todo List:");
-    if (cmd.getName().equalsIgnoreCase("todo")) {
-      for (String item : todo) sender.sendMessage("- " + item);
+    if (args.length == 0) return false;
+    switch (args[0]) {
+      // clear the graph
+      case "clear":
+        BeatCraft.debug("clearing sound networks");
+        blockManager.graph.groups.clear();
+        return true;
     }
-    return true;
+    return false;
   }
 
   // 

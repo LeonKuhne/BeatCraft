@@ -170,4 +170,19 @@ public class Group extends HashSet<Node> {
     }
     return builder.toString();
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof Group)) return false;
+    Group group = (Group) obj;
+    if (group.size() != this.size()) return false;
+    return this.containsAll(group);
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 0;
+    for (Node node : this) hash += node.hashCode();
+    return hash;
+  }
 }

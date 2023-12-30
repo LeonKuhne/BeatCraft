@@ -12,7 +12,6 @@ import dev.leonk.BeatCraft;
 import dev.leonk.blocks.BeatBlock;
 
 public class Graph {
-
   public Set<Group> groups;
 
   public Graph() {
@@ -42,27 +41,28 @@ public class Graph {
     }
     // add node to merged group
     merge(involvedGroups).add(node);
+    BeatCraft.debug(String.format("state after connect: %s", this));
   }
 
   public void disconnect(Node node) {
     // disconnect all edges
+    for (Edge edge : node.connections.values()) edge.disconnect();
+
+    // remove node's group
+    remove(findGroup(node));
+
     for (Edge edge : node.connections.values()) {
-      edge.disconnect();
-      // replace with next best edge
+      // connect edges passing back
       Edge edgePassingBack = sameAxis(edge.to).get(edge.direction.getOppositeFace());
       if (edgePassingBack == null) continue;
       edgePassingBack.connect();
-    }
-
-    // remove node from group
-    groups.remove(findGroup(node));
-
-    // collect new groups
-    for (Edge edge : node.connections.values()) {
+      // collect new groups
       Group newGroup = new Group();
       for (Node newNode : Group.collectNodes(edge.to)) newGroup.add(newNode);
       groups.add(newGroup);
     }
+
+    BeatCraft.debug(String.format("state after disconnect: %s", this));
   }
 
   public BeatBlock find(Block block) { 
@@ -165,10 +165,19 @@ public class Graph {
     return group;
   }
 
+  private void remove(Group target) {
+    Set<Group> newGroups = new HashSet<>();
+    for (Group group : groups) {
+      if (group.equals(target)) continue;
+      newGroups.add(group);
+    }
+    groups = newGroups;
+  }
+
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
-    builder.append("BeatGraph(\n");
+    builder.append(String.format("BeatGraph#%s(\n", hashCode()));
     for (Set<Node> group : groups) {
       builder.append(String.format("- Group(%d)\n", group.size()));
       for (Node node : group) {
