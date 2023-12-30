@@ -7,13 +7,12 @@ import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Note;
-import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.NoteBlock;
 import org.bukkit.inventory.ItemStack;
 import dev.leonk.blocks.BeatBlock;
-import dev.leonk.blocks.BeatGraph.Edge;
+import dev.leonk.blocks.graph.Edge;
 
 public class Sequencer extends BeatBlock {
   public static String BASE_NAME = "Sequencer";
@@ -35,24 +34,20 @@ public class Sequencer extends BeatBlock {
       changePitchBy(blockHeight(cursor) * -1);
     }
 
-    // play sound
-    play(cursor);
+    // spawn a note particle over the cursor
+    noteParticle(getNote(cursor).getNote(), cursor.getLocation());
   }
 
-  public void play(Block step) {
-    if (step.getType() == Material.AIR) return;
-    // play the note of the noteblock 
-    NoteBlock note = (NoteBlock) block.getBlockData(); 
-    block.getWorld().playNote(block.getLocation(), note.getInstrument(), note.getNote());
-    // spawn a particle effect over the block, the same particle effect as the note block note
-    noteParticle(step.getLocation(), note.getNote());
+  public void play(Block step) { play(step, block.getLocation()); }
+  public void play(Block step, Location at) { play(getNote(step), at); }
+  public void play(NoteBlock note, Location at) {
+    if (note == null) return;
+    block.getWorld().playNote(at, note.getInstrument(), note.getNote());
   }
 
-  private void noteParticle(Location pos, Note note) {
-    pos = pos.add(.5, 1.5, .5);
-    @SuppressWarnings("deprecation")
-    double noteColor = note.getId() / 24D;
-    pos.getWorld().spawnParticle(Particle.NOTE, pos, 0, noteColor, 0, 0, 1);
+  public NoteBlock getNote(Block step) {
+    if (step == null || step.getType() == Material.AIR) return null;
+    return (NoteBlock) block.getBlockData(); 
   }
 
   public static ItemStack getItem(int amount) {
@@ -74,6 +69,7 @@ public class Sequencer extends BeatBlock {
     return null;
   }
 
+  @SuppressWarnings("deprecation")
   private void changePitchBy(int delta) {
     NoteBlock noteBlock = (NoteBlock) block.getBlockData();
     noteBlock.setNote(new Note((byte) ((noteBlock.getNote().getId() + delta + 24) % 24)));

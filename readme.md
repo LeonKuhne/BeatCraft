@@ -9,3 +9,13 @@
 ### Recipes
 - sequencer: note blocks surrounding a beat
 - repeater: note blocks surrounding an enderpearl
+- speaker: note blocks surrounding an empty bucket
+
+### TODO
+- stop sequencers when connections are broken
+- rotate sends to change their direction and make texture directional
+- fix recipe deduction glitch
+- add delay based on the type of block that is put in the line
+- change pitch based on the type of block that is put in the line (up or down)
+- right click sequencer to change speed, indicate using color/pitch/something
+- create special sequencers that only play on air and only delays through blocks

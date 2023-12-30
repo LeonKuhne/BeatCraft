@@ -11,19 +11,21 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import dev.leonk.BeatCraft;
 import dev.leonk.Sequencer;
-import dev.leonk.blocks.BeatGraph.Node;
+import dev.leonk.Speaker;
+import dev.leonk.blocks.graph.Graph;
+import dev.leonk.blocks.graph.Node;
 import dev.leonk.Send;
 
 public class BlockManager {
   private BlockListener blockUpdates;
   private BlockStore blockStorage;
-  private BeatGraph graph;
+  private Graph graph;
   private ArrayList<BiFunction<ItemStack[], Set<ItemStack>, ItemStack>> recipes;
 
   public BlockManager() {
     blockUpdates = new BlockListener(this::transmute, this::destroy, this::triggerSignal, this::craft, this::saveWorld);
     blockStorage = new BlockStore(this::transmute);
-    graph = new BeatGraph();
+    graph = new Graph();
 
     // arrange recipes
     recipes = new ArrayList<BiFunction<ItemStack[], Set<ItemStack>, ItemStack>>() {{
@@ -31,6 +33,8 @@ public class BlockManager {
       add((matrix, items) -> Send.craftShapeless(items));
       add((matrix, items) -> Sequencer.craftShaped(matrix));
       add((matrix, items) -> Sequencer.craftShapeless(items));
+      add((matrix, items) -> Speaker.craftShaped(matrix));
+      add((matrix, items) -> Speaker.craftShapeless(items));
     }};
   }
 
@@ -78,6 +82,7 @@ public class BlockManager {
     switch (type) {
       case "Sequencer": beat = new Sequencer(block); break;
       case "Send": beat = new Send(block); break;
+      case "Speaker": beat = new Speaker(block); break;
       default:
         BeatCraft.debug(String.format("unknown transmutation: %s", type));
         return;
@@ -101,6 +106,7 @@ public class BlockManager {
     switch(type) {
       case "Sequencer": item = Sequencer.getItem(1); break;
       case "Send": item = Send.getItem(1); break;
+      case "Speaker": item = Speaker.getItem(1); break;
       default:
         BeatCraft.debug(String.format("unknown block broken: %s", type));
         return;

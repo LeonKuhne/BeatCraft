@@ -6,9 +6,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Note;
 import org.bukkit.Particle;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -19,7 +21,7 @@ import org.bukkit.persistence.PersistentDataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import dev.leonk.BeatCraft;
-import dev.leonk.blocks.BeatGraph.Edge;
+import dev.leonk.blocks.graph.Edge;
 
 @DatabaseTable(tableName = "send_blocks")
 public class BeatBlock {
@@ -63,6 +65,13 @@ public class BeatBlock {
 
   public static Block getBlockAt(BeatBlock block) {
     return BeatCraft.plugin.getServer().getWorld(block.world).getBlockAt(block.x, block.y, block.z);
+  }
+
+  public static void noteParticle(Note note, Location pos) {
+    pos = pos.add(.5, 1.5, .5);
+    @SuppressWarnings("deprecation")
+    double noteColor = note.getId() / 24D;
+    pos.getWorld().spawnParticle(Particle.NOTE, pos, 0, noteColor, 0, 0, 1);
   }
 
   //

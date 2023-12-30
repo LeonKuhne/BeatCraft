@@ -1,6 +1,5 @@
 package dev.leonk;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import org.bukkit.command.Command;
@@ -24,15 +23,6 @@ public class BeatCraft extends JavaPlugin {
     plugin = this;
     log = getLogger();
     blockManager = new BlockManager();
-    todo = new ArrayList<>();
-
-    todo.add("stop sequencers when connections are broken");
-    todo.add("rotate sends to change their direction and make texture directional");
-    todo.add("fix recipe deduction glitch");
-    todo.add("add delay based on the type of block that is put in the line");
-    todo.add("change pitch based on the type of block that is put in the line (up or down)");
-    todo.add("right click sequencer to change speed, indicate using color/pitch/something");
-    todo.add("create special sequencers that only play on air and only delays through blocks");
   }
 
   @Override
@@ -63,5 +53,4 @@ public class BeatCraft extends JavaPlugin {
       player.sendMessage(string);
     }
   }
-
 }

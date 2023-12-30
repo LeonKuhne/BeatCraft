@@ -8,6 +8,6 @@ api-version: 1.20
 author: Leon Kuehne
 website: leonk.dev
 commands:
-  sample: 
+  beat: 
     description: "Beat it."
-    usage: /<command> [todo]
+    usage: /<command> [idk]
