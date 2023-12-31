@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.function.Function;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+
 import dev.leonk.BeatCraft;
 import dev.leonk.Send;
 import dev.leonk.Sequencer;
@@ -74,7 +75,6 @@ public class Group extends HashSet<Node> {
   public void propogate() {
     Set<Edge> nextState = new HashSet<>();
     if (state.size() == 0) return;
-    BeatCraft.debug(this.toString());
 
     // propogate each edge
     for (Edge edge : state) {
@@ -115,9 +115,12 @@ public class Group extends HashSet<Node> {
     state = nextState;
   }
 
-  public Set<Edge> propogate(Edge edge) { return propogate(edge, new HashSet<>()); }
-  public Set<Edge> propogate(Edge edge, Set<Edge> visited) {
-    if (visited.contains(edge)) return new HashSet<>();
+  public Set<Edge> propogate(Edge edge) { return propogate(edge, edge, new HashSet<>()); }
+  public Set<Edge> propogate(Edge target, Edge edge, Set<Edge> visited) {
+    if (visited.contains(edge) && !target.equals(edge)) { 
+      BeatCraft.debug(String.format("Stopping/Ignoring %s vs %s", target, edge));
+      return new HashSet<Edge>(); 
+    }
     visited.add(edge);
 
     // activate if signal arrived
@@ -125,12 +128,11 @@ public class Group extends HashSet<Node> {
     if (edge.distance == 1 || edge.from.beat instanceof Send) {
       edge.to.beat.trigger();
 
-      // forward signal if send
+      // forward signal
       for (Edge nextEdge : edge.to.connections.values()) {
-        // dont return signal
         if (nextEdge.to.equals(edge.from)) continue;
         // add connections
-        activated.addAll(propogate(nextEdge.clone(), visited));
+        activated.addAll(propogate(target, nextEdge.clone(), visited));
       }
       return activated;
     }
@@ -138,6 +140,7 @@ public class Group extends HashSet<Node> {
     // decrease the distance
     edge.distance--;
     edge.from.beat.stimulate(edge);
+    BeatCraft.debug(String.format("Stimulating %s", edge));
 
     activated.add(edge);
     return activated;
@@ -164,9 +167,12 @@ public class Group extends HashSet<Node> {
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
-    builder.append(String.format("Group(%d): ", this.size()));
+    builder.append(String.format("Group(%d): \n", this.size()));
     for (Node node : this) {
-      builder.append(String.format("- %s, ", node));
+      builder.append(String.format("- %s\n", node));
+      for (Edge edge : node.connections.values()) {
+        builder.append(String.format("  > %s\n", edge));
+      }
     }
     return builder.toString();
   }

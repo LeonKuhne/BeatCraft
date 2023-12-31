@@ -42,6 +42,11 @@ public class BeatCraft extends JavaPlugin {
         BeatCraft.debug("clearing sound networks");
         blockManager.graph.groups.clear();
         return true;
+
+      // show graph
+      case "graph":
+        BeatCraft.debug(String.format("Graph:\n%s", blockManager.graph));
+        return true;
     }
     return false;
   }

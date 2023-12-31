@@ -133,7 +133,7 @@ public class BeatBlock {
 
   @Override
   public String toString() {
-    return String.format("%s(%d, %d, %d)", type, x, y, z);
+    return String.format("%s(%d,%d,%d)", type, x, y, z);
   }
 
   protected static boolean recipeMatch(String pattern, ItemStack[] ingredients, Map<String, Material> mapping) {

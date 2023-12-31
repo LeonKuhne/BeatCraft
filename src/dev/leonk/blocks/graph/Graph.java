@@ -27,7 +27,11 @@ public class Graph {
   }
 
   public void propogate() {
-    for (Group group : groups) group.propogate();
+    for (Group group : groups) {
+      group.propogate();
+      if (group.state.isEmpty()) continue;
+      BeatCraft.debug(String.format("state: %s", group.state));
+    }
   }
 
   public void connect(BeatBlock beat) {
@@ -177,14 +181,10 @@ public class Graph {
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
-    builder.append(String.format("BeatGraph#%s(\n", hashCode()));
+    builder.append(String.format("BeatGraph #%s:\n", hashCode()));
     for (Set<Node> group : groups) {
-      builder.append(String.format("- Group(%d)\n", group.size()));
-      for (Node node : group) {
-        builder.append(String.format("  - %s\n", node));
-      }
+      builder.append(String.format("%s\n", group));
     }
-    builder.append(")");
     return builder.toString();
   }
 }
