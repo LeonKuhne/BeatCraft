@@ -1,1 +1,10 @@
-{"pack":{"pack_format":3,"description":"BeatCraft Textures"}}
+{
+  "pack":{
+    "pack_format": 22,
+    "description": "§8Textures for §6BeatCraft",
+    "supported_formats": {
+      "min_inclusive": 16,
+      "max_inclusive": 22
+    }
+  }
+}

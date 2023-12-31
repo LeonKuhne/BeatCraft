@@ -50,8 +50,9 @@ function update() {
   start
 }
 
-# host resource pack
 function pack() {
   if [ ! -d "resources" ]; then; err "Expected resources directory 'resources'" && return; fi
   (cd resources && zip -r ../pack.zip .)
+  # save to resource pack folder
+  cp pack.zip /mnt/c/Users/leonk/AppData/Roaming/.minecraft/resourcepacks/BeatCraft.zip
 }
