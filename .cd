@@ -47,6 +47,11 @@ function update() {
     java -jar BuildTools.jar --rev $1
     mv spigot-*.jar spigot.jar
   )
-
   start
+}
+
+# host resource pack
+function pack() {
+  if [ ! -d "resources" ]; then; err "Expected resources directory 'resources'" && return; fi
+  (cd resources && zip -r ../pack.zip .)
 }

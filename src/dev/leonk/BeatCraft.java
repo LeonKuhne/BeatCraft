@@ -47,6 +47,11 @@ public class BeatCraft extends JavaPlugin {
       case "graph":
         BeatCraft.debug(String.format("Graph:\n%s", blockManager.graph));
         return true;
+
+      case "reset":
+        BeatCraft.debug("resetting blocks");
+        blockManager = new BlockManager();
+        return true;
     }
     return false;
   }

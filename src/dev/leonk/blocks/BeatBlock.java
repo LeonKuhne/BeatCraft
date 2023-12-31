@@ -9,6 +9,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Note;
 import org.bukkit.Particle;
@@ -153,5 +154,11 @@ public class BeatBlock {
     // check filter
     if (!filter.apply(symbol, ingredient)) return false;
     return eachMapping(pattern, ingredients, filter, cursor + 1);
+  }
+
+  protected static BlockFace[] directions() {
+    return new BlockFace[] {
+      BlockFace.NORTH, BlockFace.EAST, BlockFace.UP, BlockFace.DOWN, BlockFace.SOUTH, BlockFace.WEST,
+    };
   }
 }

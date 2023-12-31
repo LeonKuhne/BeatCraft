@@ -12,7 +12,7 @@
 - speaker: note blocks surrounding an empty bucket
 
 ### TODO
-- stop sequencers when connections are broken
+- spawn particles on beats indicating type of block
 - rotate sends to change their direction and make texture directional
 - fix recipe deduction glitch
 - add delay based on the type of block that is put in the line
