@@ -48,10 +48,16 @@ public class BeatCraft extends JavaPlugin {
         BeatCraft.debug(String.format("Graph:\n%s", blockManager.graph));
         return true;
 
+      // reset plugin
       case "reset":
         BeatCraft.debug("resetting blocks");
         blockManager = new BlockManager();
         return true;
+
+      // get the code of a string
+      case "code":
+        if (args.length < 2) return false;
+        BeatCraft.debug(String.format("code of %s is %s", args[1], args[1].hashCode() % 1000));
     }
     return false;
   }

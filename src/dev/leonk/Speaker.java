@@ -14,7 +14,7 @@ public class Speaker extends BeatBlock {
   public Speaker(Block block) { super(block, BASE_NAME); }
 
   public static ItemStack getItem(int amount) {
-    return getItem("Speaker", "play audio signals", Material.NOTE_BLOCK, amount);
+    return getItem("Speaker", "play audio signals", amount);
   }
 
   public static ItemStack craftShapeless(Set<ItemStack> ingredients) {

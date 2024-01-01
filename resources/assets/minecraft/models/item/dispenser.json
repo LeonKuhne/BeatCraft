@@ -1,0 +1,19 @@
+{
+  "parent": "minecraft:block/dispenser",
+  "textures": {
+    "layer0": "minecraft:block/dispenser"
+  },
+  "overrides": [{ 
+    "predicate": {},
+    "model": "minecraft:block/dispenser"
+  }, {
+    "predicate": { "custom_model_data": 161 }, 
+    "model": "minecraft:block/sequencer" 
+  }, {
+    "predicate": { "custom_model_data": 224 }, 
+    "model": "minecraft:block/send" 
+  }, {
+    "predicate": { "custom_model_data": 473 }, 
+    "model": "minecraft:block/speaker" 
+  }]
+}

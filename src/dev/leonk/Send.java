@@ -14,7 +14,7 @@ public class Send extends BeatBlock {
   public Send(Block block) { super(block, BASE_NAME); }
 
   public static ItemStack getItem(int amount) {
-    return getItem("Send", "forward audio signals", Material.JIGSAW, amount);
+    return getItem("Send", "forward audio signals", amount);
   }
 
   public static ItemStack craftShapeless(Set<ItemStack> ingredients) {

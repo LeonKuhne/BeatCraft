@@ -78,18 +78,17 @@ public class BeatBlock {
   //
   // accessors
 
-  public static ItemStack getItem(String type, String description, Material material, int amount) {
-    ItemStack item = new ItemStack(material, amount);
+  @SuppressWarnings("deprecation")
+  public static ItemStack getItem(String type, String description, int amount) {
+    ItemStack item = new ItemStack(Material.LEGACY_DISPENSER, amount);
     ItemMeta meta = item.getItemMeta();
     meta.setDisplayName(ChatColor.GOLD + type);
     meta.setLore(new ArrayList<String>() {{ add(description); }});
     meta.getPersistentDataContainer().set(itemId, PersistentDataType.STRING, type);
+    // use the designated material
+    meta.setCustomModelData(modelKey(type));
     item.setItemMeta(meta);
     return item;
-  }
-
-  public String getType() {
-    return getType(block);
   }
 
   public static String getType(ItemStack item) {
@@ -160,5 +159,9 @@ public class BeatBlock {
     return new BlockFace[] {
       BlockFace.NORTH, BlockFace.EAST, BlockFace.UP, BlockFace.DOWN, BlockFace.SOUTH, BlockFace.WEST,
     };
+  }
+
+  private static int modelKey(String name) {
+    return Math.abs(name.hashCode()) % 1000;
   }
 }

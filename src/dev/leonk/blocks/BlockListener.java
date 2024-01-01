@@ -15,6 +15,8 @@ import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
 
+import dev.leonk.BeatCraft;
+
 public class BlockListener implements Listener {
 
   private BiConsumer<Block, String> onPlace;
@@ -36,9 +38,10 @@ public class BlockListener implements Listener {
     this.onCraft = onCraft;
     this.onSave = onSave;
   }
-  
+
   @EventHandler
   public void onBlockPlace(BlockPlaceEvent event) {
+    BeatCraft.debug(String.format("onBlockPlace, event %s", event));
     ItemStack item = event.getItemInHand();
     Block block = event.getBlockPlaced();
     if (item == null || block == null) return;

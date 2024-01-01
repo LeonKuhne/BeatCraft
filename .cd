@@ -8,7 +8,15 @@ function build() {
   mvn clean compile assembly:single
 }
 
+function pack() {
+  if [ ! -d "resources" ]; then; err "Expected resources directory 'resources'" && return; fi
+  (cd resources && zip -r ../pack.zip .)
+  # save to resource pack folder
+  cp pack.zip /mnt/c/Users/leonk/AppData/Roaming/.minecraft/resourcepacks/BeatCraft.zip
+}
+
 function upload() {
+  pack
   build
   if [ ! -d "test" ]; then
     err "Expected test server directory 'test' containing script 'start.sh'" && return
@@ -50,9 +58,3 @@ function update() {
   start
 }
 
-function pack() {
-  if [ ! -d "resources" ]; then; err "Expected resources directory 'resources'" && return; fi
-  (cd resources && zip -r ../pack.zip .)
-  # save to resource pack folder
-  cp pack.zip /mnt/c/Users/leonk/AppData/Roaming/.minecraft/resourcepacks/BeatCraft.zip
-}

@@ -52,7 +52,7 @@ public class Sequencer extends BeatBlock {
   }
 
   public static ItemStack getItem(int amount) {
-    return BeatBlock.getItem("Sequencer", "right click to change pitch", Material.STRUCTURE_BLOCK, amount);
+    return BeatBlock.getItem("Sequencer", "right click to change pitch", amount);
   }
 
   public static ItemStack craftShapeless(Set<ItemStack> ingredients) {
