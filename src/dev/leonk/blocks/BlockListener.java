@@ -5,12 +5,14 @@ import java.util.function.Function;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
@@ -37,6 +39,15 @@ public class BlockListener implements Listener {
     this.onPunch = onPunch;
     this.onCraft = onCraft;
     this.onSave = onSave;
+  }
+
+  @EventHandler
+  public void onPlayerInteract(PlayerInteractEvent event) {
+    Block block = event.getClickedBlock();
+    if (block == null) return;
+    if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+    if (BeatBlock.getType(block) == null) return;
+    event.setCancelled(true);
   }
 
   @EventHandler

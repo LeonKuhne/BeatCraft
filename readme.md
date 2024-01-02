@@ -12,6 +12,7 @@
 - speaker: note blocks surrounding an empty bucket
 
 ### TODO
+- on adding beats to graph, show connected paths using particle effects
 - spawn particles on beats indicating type of block
 - rotate sends to change their direction and make texture directional
 - fix recipe deduction glitch

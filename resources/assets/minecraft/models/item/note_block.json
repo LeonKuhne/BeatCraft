@@ -1,11 +1,11 @@
 {
-  "parent": "minecraft:block/dispenser",
+  "parent": "minecraft:block/note_block",
   "textures": {
-    "layer0": "minecraft:block/dispenser"
+    "layer0": "block/note_block"
   },
   "overrides": [{ 
     "predicate": {},
-    "model": "minecraft:block/dispenser"
+    "model": "minecraft:block/note_block"
   }, {
     "predicate": { "custom_model_data": 161 }, 
     "model": "minecraft:block/sequencer" 

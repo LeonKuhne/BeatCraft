@@ -5,16 +5,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
+
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Instrument;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.type.NoteBlock;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Note;
 import org.bukkit.Particle;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.MapMeta;
+import org.bukkit.map.MapView;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -54,7 +61,7 @@ public class BeatBlock {
     this.x = block.getX();
     this.y = block.getY();
     this.z = block.getZ();
-    block.setMetadata(BASE_TYPE, new FixedMetadataValue(BeatCraft.plugin, type));
+    place(block, type);
   }
 
   public String getName() { return type; }
@@ -73,6 +80,40 @@ public class BeatBlock {
     @SuppressWarnings("deprecation")
     double noteColor = note.getId() / 24D;
     pos.getWorld().spawnParticle(Particle.NOTE, pos, 0, noteColor, 0, 0, 1);
+  }
+
+  public static void place(Block block, String type) {
+    block.setType(Material.NOTE_BLOCK);
+    block.setMetadata(BASE_TYPE, new FixedMetadataValue(BeatCraft.plugin, type));
+    // set instrument to custom head
+    NoteBlock note = (NoteBlock) block.getBlockData();
+    note.setInstrument(Instrument.CUSTOM_HEAD);
+    block.setBlockData(note);
+
+    /*
+    // create a texture map
+    MapView textureMap = Bukkit.createMap(block.getWorld());
+    textureMap.getRenderers().clear();
+    textureMap.addRenderer(new Texture(type));
+
+    ItemStack texture = new ItemStack(Material.FILLED_MAP);
+    MapMeta meta = (MapMeta) texture.getItemMeta();
+    // tag with a map of 27
+    meta.setCustomModelData(modelKey(type));
+    meta.setMapView(textureMap);
+    texture.setItemMeta(meta);
+
+    // put down a noteblock and cover it with item frames
+    for (BlockFace direction : directions()) {
+      Block neighbor = block.getRelative(direction);
+      if (neighbor.getType() != Material.AIR) continue;
+      ItemFrame frame = block.getWorld().spawn(neighbor.getLocation(), ItemFrame.class); 
+      frame.setVisible(false);
+      frame.setFacingDirection(direction);
+      frame.setItem(texture);
+      frame.setPersistent(true);
+    }
+    */
   }
 
   //
