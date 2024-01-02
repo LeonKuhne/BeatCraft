@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
-
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Instrument;
 import org.bukkit.Location;
@@ -14,14 +12,11 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.NoteBlock;
-import org.bukkit.entity.ItemFrame;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Note;
 import org.bukkit.Particle;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.MapMeta;
-import org.bukkit.map.MapView;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -90,39 +85,13 @@ public class BeatBlock {
     note.setInstrument(Instrument.CUSTOM_HEAD);
     note.setNote(new Note(blockModelId));
     block.setBlockData(note);
-
-    /*
-    // create a texture map
-    MapView textureMap = Bukkit.createMap(block.getWorld());
-    textureMap.getRenderers().clear();
-    textureMap.addRenderer(new Texture(type));
-
-    ItemStack texture = new ItemStack(Material.FILLED_MAP);
-    MapMeta meta = (MapMeta) texture.getItemMeta();
-    // tag with a map of 27
-    meta.setCustomModelData(modelKey(type));
-    meta.setMapView(textureMap);
-    texture.setItemMeta(meta);
-
-    // put down a noteblock and cover it with item frames
-    for (BlockFace direction : directions()) {
-      Block neighbor = block.getRelative(direction);
-      if (neighbor.getType() != Material.AIR) continue;
-      ItemFrame frame = block.getWorld().spawn(neighbor.getLocation(), ItemFrame.class); 
-      frame.setVisible(false);
-      frame.setFacingDirection(direction);
-      frame.setItem(texture);
-      frame.setPersistent(true);
-    }
-    */
   }
 
   //
   // accessors
 
-  @SuppressWarnings("deprecation")
   public static ItemStack getItem(String type, String description, int amount) {
-    ItemStack item = new ItemStack(Material.LEGACY_DISPENSER, amount);
+    ItemStack item = new ItemStack(Material.NOTE_BLOCK, amount);
     ItemMeta meta = item.getItemMeta();
     meta.setDisplayName(ChatColor.GOLD + type);
     meta.setLore(new ArrayList<String>() {{ add(description); }});

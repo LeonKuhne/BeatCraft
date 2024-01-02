@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-		"0": "minecraft:block/note_block",
+		"0": "minecraft:block/send_side",
 		"3": "minecraft:block/send_front",
 		"4": "minecraft:block/send_back",
     "particle": "minecraft:block/note_block"
