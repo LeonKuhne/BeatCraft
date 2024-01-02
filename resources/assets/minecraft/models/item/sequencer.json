@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/sequencer",
   "textures": {
-    "layer0": "minecraft:block/sequencer"
+    "layer0": "block/sequencer"
   }
 }

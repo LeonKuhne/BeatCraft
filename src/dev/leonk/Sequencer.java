@@ -15,9 +15,10 @@ import dev.leonk.blocks.graph.Edge;
 
 public class Sequencer extends BeatBlock {
   public static String BASE_NAME = "Sequencer";
+  private static int BLOCK_MODEL_ID = 0;
 
   public Sequencer(Block block) {
-    super(block, BASE_NAME); 
+    super(block, BASE_NAME, BLOCK_MODEL_ID);
   }
 
   @Override

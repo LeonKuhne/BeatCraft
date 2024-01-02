@@ -1,7 +1,7 @@
 {
   "variants": {
-    "instrument=custom_head,note=0": { "model": "minecraft:block/send" },
-    "instrument=custom_head,note=1": { "model": "minecraft:block/sequencer" },
-    "instrument=custom_head": { "model": "minecraft:block/speaker" }
+    "instrument=custom_head,note=0": { "model": "minecraft:block/sequencer" },
+    "instrument=custom_head,note=1": { "model": "minecraft:block/send" },
+    "instrument=custom_head,note=2": { "model": "minecraft:block/speaker" }
   }
 }

@@ -1,6 +1,6 @@
 {
-  "parent": "minecraft:block/sequencer",
+  "parent": "minecraft:block/send",
   "textures": {
-    "layer0": "minecraft:block/send_front"
+    "layer0": "block/send"
   }
 }

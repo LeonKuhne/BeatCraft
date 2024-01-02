@@ -1,6 +1,6 @@
 {
-  "parent": "minecraft:block/sequencer",
+  "parent": "minecraft:block/speaker",
   "textures": {
-    "layer0": "minecraft:block/speaker"
+    "layer0": "block/speaker"
   }
 }

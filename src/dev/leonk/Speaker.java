@@ -10,8 +10,9 @@ import dev.leonk.blocks.BeatBlock;
 
 public class Speaker extends BeatBlock {
   public static String BASE_NAME = "Speaker";
+  private static int BLOCK_MODEL_ID = 2;
 
-  public Speaker(Block block) { super(block, BASE_NAME); }
+  public Speaker(Block block) { super(block, BASE_NAME, BLOCK_MODEL_ID); }
 
   public static ItemStack getItem(int amount) {
     return getItem("Speaker", "play audio signals", amount);

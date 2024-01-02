@@ -51,17 +51,17 @@ public class BeatBlock {
   protected String type;
 
   public BeatBlock() {}
-  public BeatBlock(BeatBlock block, String type) {
-    this(BeatCraft.plugin.getServer().getWorld(block.world).getBlockAt(block.x, block.y, block.z), type);
+  public BeatBlock(BeatBlock block, String type, int blockModelId) {
+    this(BeatCraft.plugin.getServer().getWorld(block.world).getBlockAt(block.x, block.y, block.z), type, blockModelId);
   }
-  public BeatBlock(Block block, String type) {
+  public BeatBlock(Block block, String type, int blockModelId) {
     this.type = type;
     this.block = block;
     this.world = block.getWorld().getName();
     this.x = block.getX();
     this.y = block.getY();
     this.z = block.getZ();
-    place(block, type);
+    place(block, type, blockModelId);
   }
 
   public String getName() { return type; }
@@ -82,12 +82,13 @@ public class BeatBlock {
     pos.getWorld().spawnParticle(Particle.NOTE, pos, 0, noteColor, 0, 0, 1);
   }
 
-  public static void place(Block block, String type) {
+  public static void place(Block block, String type, int blockModelId) {
     block.setType(Material.NOTE_BLOCK);
     block.setMetadata(BASE_TYPE, new FixedMetadataValue(BeatCraft.plugin, type));
     // set instrument to custom head
     NoteBlock note = (NoteBlock) block.getBlockData();
     note.setInstrument(Instrument.CUSTOM_HEAD);
+    note.setNote(new Note(blockModelId));
     block.setBlockData(note);
 
     /*
