@@ -40,7 +40,7 @@ function dev() {
 
 function start() {
   if [ ! -d "test" ]; then; err "Expected test server directory 'test'" && return; fi
-  (cd test && java -Xms1G -Xmx1G -XX:+UseG1GC -jar spigot.jar nogui)
+  (cd test && java -Xms2G -Xmx2G -XX:+UseG1GC -jar spigot.jar nogui)
 }
 
 function update() {

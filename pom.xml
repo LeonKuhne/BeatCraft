@@ -72,12 +72,6 @@
           <include>plugin.yml</include>
         </includes>
       </resource>
-      <resource>
-        <directory>${project.basedir}/src/resources</directory>
-        <includes>
-          <include>**/*.png</include>
-        </includes>
-      </resource>
     </resources>
   </build>
 </project>
