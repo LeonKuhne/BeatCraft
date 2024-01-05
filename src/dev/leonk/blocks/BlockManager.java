@@ -1,9 +1,5 @@
 package dev.leonk.blocks;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.function.BiFunction;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.block.Block;
@@ -20,33 +16,22 @@ public class BlockManager {
   public Graph graph;
   private BlockListener blockUpdates;
   private BlockStore blockStorage;
-  private ArrayList<BiFunction<ItemStack[], Set<ItemStack>, ItemStack>> recipes;
 
   public BlockManager() {
-    blockUpdates = new BlockListener(this::transmute, this::destroy, this::triggerSignal, this::craft, this::saveWorld);
+    blockUpdates = new BlockListener(this::transmute, this::destroy, this::triggerSignal, this::saveWorld);
     blockStorage = new BlockStore(this::transmute);
     graph = new Graph();
-
-    // arrange recipes
-    recipes = new ArrayList<BiFunction<ItemStack[], Set<ItemStack>, ItemStack>>() {{
-      add((matrix, items) -> Send.craftShaped(matrix));
-      add((matrix, items) -> Send.craftShapeless(items));
-      add((matrix, items) -> Sequencer.craftShaped(matrix));
-      add((matrix, items) -> Sequencer.craftShapeless(items));
-      add((matrix, items) -> Speaker.craftShaped(matrix));
-      add((matrix, items) -> Speaker.craftShapeless(items));
-    }};
   }
 
   public void register(Plugin plugin) {
     Server server = plugin.getServer();
+    server.addRecipe(Send.getRecipe());
+    server.addRecipe(Sequencer.getRecipe());
+    server.addRecipe(Speaker.getRecipe());
     blockStorage.load();
     server.getPluginManager().registerEvents(blockUpdates, plugin);
-    server.getScheduler().scheduleSyncRepeatingTask(plugin, this::tick, 0, 4);
-  }
-
-  public void tick() {
-    graph.propogate();
+    server.getScheduler().scheduleSyncRepeatingTask(plugin, graph::propogate, 0, 4);
+    server.getScheduler().scheduleSyncRepeatingTask(plugin, graph::inspect, 0, 10);
   }
 
   private void triggerSignal(Block block, String type) {
@@ -54,19 +39,6 @@ public class BlockManager {
     BeatCraft.debug(String.format("triggering %s", node));
     if (node == null) return;
     graph.trigger(node);
-  }
-
-  private ItemStack craft(ItemStack[] ingredients) {
-    BeatCraft.debug(String.format("crafting with %d ingredients", ingredients.length));
-    // assemble ingredients
-    Set<ItemStack> unshapedIngredients = new HashSet<ItemStack>();
-    for (ItemStack item : ingredients) if (item != null) unshapedIngredients.add(item);
-    // apply recipes
-    for (BiFunction<ItemStack[], Set<ItemStack>, ItemStack> recipe : recipes) {
-      ItemStack result = recipe.apply(ingredients, unshapedIngredients);
-      if (result != null) return result;
-    }
-    return null;
   }
 
   public void saveWorld() {

@@ -9,17 +9,20 @@ public class Edge {
   public Node to;
   public BlockFace direction;
   public int distance;
+  public int totalDistance;
 
   public Edge(Node from, Node to, BlockFace direction) {
     this(from, to, direction,
       (int) from.beat.getBlock().getLocation().distance(to.beat.getBlock().getLocation())
     );
   }
-  public Edge(Node from, Node to, BlockFace direction, int distance) {
+  public Edge(Node from, Node to, BlockFace direction, int distance) { this(from, to, direction, distance, distance); }
+  public Edge(Node from, Node to, BlockFace direction, int distance, int totalDistance) {
     this.from = from;
     this.to = to;
     this.direction = direction;
     this.distance = distance;
+    this.totalDistance = totalDistance;
   }
   public void connect() {
     from.connections.put(direction, this);
@@ -30,9 +33,12 @@ public class Edge {
     from.connections.remove(direction);
     to.connections.remove(direction.getOppositeFace());
   }
-  public Edge reverse() { return new Edge(to, from, direction.getOppositeFace(), distance); }
+  public void reset() {
+    this.distance = this.totalDistance;
+  }
+  public Edge reverse() { return new Edge(to, from, direction.getOppositeFace(), distance, totalDistance); }
   public Block cursor() { return to.beat.getBlock().getRelative(direction.getOppositeFace(), distance); }
-  public Edge clone() { return new Edge(from, to, direction, distance); }
+  public Edge clone() { return new Edge(from, to, direction, distance, totalDistance); }
   @Override
   public String toString() { 
     StringBuilder builder = new StringBuilder();

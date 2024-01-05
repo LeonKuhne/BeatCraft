@@ -6,16 +6,30 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Snowball;
+import org.bukkit.util.Vector;
 import dev.leonk.BeatCraft;
 import dev.leonk.blocks.BeatBlock;
 
 public class Graph {
   public Set<Group> groups;
+  private Set<Edge> edges;
 
   public Graph() {
     groups = new HashSet<>();
+    edges = new HashSet<>();
+  }
+
+  public void inspect() {
+    for (Edge edge : this.edges) {
+      spawnParticle(edge);
+    }
   }
 
   public void trigger(Node node) {
@@ -40,6 +54,7 @@ public class Graph {
     // connect all edges / find involved groups
     Set<Group> involvedGroups = new HashSet<>();
     for (Edge edge : connections.values()) {
+      edges.add(edge);
       edge.connect();
       involvedGroups.add(findGroup(edge.to));
     }
@@ -50,7 +65,10 @@ public class Graph {
 
   public void disconnect(Node node) {
     // disconnect all edges
-    for (Edge edge : node.connections.values()) edge.disconnect();
+    for (Edge edge : node.connections.values()) {
+      edges.remove(edge);
+      edge.disconnect();
+    }
 
     // remove node's group
     remove(findGroup(node));
@@ -186,5 +204,25 @@ public class Graph {
       builder.append(String.format("%s\n", group));
     }
     return builder.toString();
+  }
+
+  private void spawnParticle(Edge edge) {
+      Block block = edge.from.beat.getBlock();
+      World world = block.getWorld();
+      Location spawn = block.getLocation();
+
+      // spawn a snowball
+      Snowball snowball = world.spawn(spawn, Snowball.class);
+      Vector velocity = edge.direction.getDirection().multiply(0.5);
+      snowball.setVelocity(velocity);
+
+      // spawn invisible armor stand
+      ArmorStand armorStand = (ArmorStand) world.spawnEntity(spawn, EntityType.ARMOR_STAND);
+      armorStand.setGravity(false);
+      armorStand.setVisible(false);
+      armorStand.setSmall(true);
+      armorStand.setInvulnerable(true);
+      armorStand.setCollidable(false);
+      armorStand.addPassenger(snowball);
   }
 }

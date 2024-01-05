@@ -1,15 +1,15 @@
 package dev.leonk;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Note;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.NoteBlock;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.ShapedRecipe;
 import dev.leonk.blocks.BeatBlock;
 import dev.leonk.blocks.graph.Edge;
 
@@ -56,19 +56,11 @@ public class Sequencer extends BeatBlock {
     return BeatBlock.getItem("Sequencer", "right click to change pitch", amount);
   }
 
-  public static ItemStack craftShapeless(Set<ItemStack> ingredients) {
-    return uncraft(ingredients, BASE_NAME, new ItemStack(Material.NOTE_BLOCK, 8));
-  }
-
-  public static ItemStack craftShaped(ItemStack[] ingredients) {
-    Map<String, Material> map = new HashMap<String, Material>() {{
-      put("#", Material.NOTE_BLOCK);
-      put("x", Material.BEETROOT);
-    }};
-
-    // 8 note blocks surrounding 1 beetroot
-    if (BeatBlock.recipeMatch("####x####", ingredients, map)) return getItem(1);
-    return null;
+  public static Recipe getRecipe() {
+    return new ShapedRecipe(new NamespacedKey(BeatCraft.plugin, BASE_NAME), getItem(1))
+      .shape("###", "#x#", "###")
+      .setIngredient('#', Material.NOTE_BLOCK)
+      .setIngredient('x', Material.BEETROOT);
   }
 
   @SuppressWarnings("deprecation")

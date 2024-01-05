@@ -2,9 +2,7 @@ package dev.leonk.blocks;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
 import org.bukkit.ChatColor;
 import org.bukkit.Instrument;
 import org.bukkit.Location;
@@ -46,9 +44,6 @@ public class BeatBlock {
   protected String type;
 
   public BeatBlock() {}
-  public BeatBlock(BeatBlock block, String type, int blockModelId) {
-    this(BeatCraft.plugin.getServer().getWorld(block.world).getBlockAt(block.x, block.y, block.z), type, blockModelId);
-  }
   public BeatBlock(Block block, String type, int blockModelId) {
     this.type = type;
     this.block = block;
@@ -146,26 +141,6 @@ public class BeatBlock {
   public String toString() {
     return String.format("%s(%d,%d,%d)", type, x, y, z);
   }
-
-  protected static boolean recipeMatch(String pattern, ItemStack[] ingredients, Map<String, Material> mapping) {
-    if (pattern.length() != ingredients.length) return false;
-    return eachMapping(pattern, ingredients, (symbol, item) -> {
-      if (item == null) return false;
-      Material material = mapping.get(String.valueOf(symbol));
-      return material == item.getType();
-    }, 0);
-  }
-
-  protected static boolean eachMapping(String pattern, ItemStack[] ingredients, BiFunction<String, ItemStack, Boolean> filter, int cursor) {
-    if (cursor == pattern.length()) return true;
-    // find next
-    String symbol = pattern.substring(cursor, cursor + 1); 
-    ItemStack ingredient = ingredients[cursor];
-    // check filter
-    if (!filter.apply(symbol, ingredient)) return false;
-    return eachMapping(pattern, ingredients, filter, cursor + 1);
-  }
-
   protected static BlockFace[] directions() {
     return new BlockFace[] {
       BlockFace.NORTH, BlockFace.EAST, BlockFace.UP, BlockFace.DOWN, BlockFace.SOUTH, BlockFace.WEST,

@@ -1,11 +1,11 @@
 package dev.leonk;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.ShapedRecipe;
 import dev.leonk.blocks.BeatBlock;
 
 public class Speaker extends BeatBlock {
@@ -18,18 +18,10 @@ public class Speaker extends BeatBlock {
     return getItem("Speaker", "play audio signals", amount);
   }
 
-  public static ItemStack craftShapeless(Set<ItemStack> ingredients) {
-    return uncraft(ingredients, BASE_NAME, new ItemStack(Material.NOTE_BLOCK, 8));
-  }
-
-  public static ItemStack craftShaped(ItemStack[] ingredients) {
-    Map<String, Material> map = new HashMap<String, Material>() {{
-      put("#", Material.NOTE_BLOCK);
-      put("u", Material.BUCKET);
-    }};
-
-    // 8 note blocks surrounding 1 bucket
-    if (BeatBlock.recipeMatch("####u####", ingredients, map)) return getItem(1);
-    return null;
+  public static Recipe getRecipe() {
+    return new ShapedRecipe(new NamespacedKey(BeatCraft.plugin, BASE_NAME), getItem(1))
+      .shape("###", "#x#", "###")
+      .setIngredient('#', Material.NOTE_BLOCK)
+      .setIngredient('x', Material.BUCKET);
   }
 }
