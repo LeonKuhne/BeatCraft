@@ -16,7 +16,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
-
 import dev.leonk.BeatCraft;
 
 public class BlockListener implements Listener {
@@ -43,8 +42,10 @@ public class BlockListener implements Listener {
 
   @EventHandler
   public void onPlayerInteract(PlayerInteractEvent event) {
+    // block interactions
     Block block = event.getClickedBlock();
     if (block == null) return;
+    // right click interaciotns
     if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
     if (BeatBlock.getType(block) == null) return;
     event.setCancelled(true);

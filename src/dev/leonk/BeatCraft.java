@@ -58,6 +58,7 @@ public class BeatCraft extends JavaPlugin {
       case "code":
         if (args.length < 2) return false;
         BeatCraft.debug(String.format("code of %s is %s", args[1], args[1].hashCode() % 1000));
+
     }
     return false;
   }

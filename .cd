@@ -12,7 +12,9 @@ function pack() {
   if [ ! -d "resources" ]; then; err "Expected resources directory 'resources'" && return; fi
   (cd resources && zip -r ../pack.zip .)
   # save to resource pack folder
-  cp pack.zip /mnt/c/Users/leonk/AppData/Roaming/.minecraft/resourcepacks/BeatCraft.zip
+  resource_pack_destination=/mnt/c/Users/leonk/AppData/Roaming/.minecraft/resourcepacks/BeatCraft.zip
+  rm $resource_pack_destination
+  cp pack.zip $resource_pack_destination
 }
 
 function upload() {

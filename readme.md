@@ -2,8 +2,8 @@
 > Lets BeatBlock's!
 
 ### Go MaaD: Minecraft as a DAW
-- Sequencers (wip)
-- Sends (wip)
+- Sequencers
+- Sends
 - Custom samples (todo)
 
 ### Recipes
