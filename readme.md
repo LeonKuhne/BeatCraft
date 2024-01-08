@@ -12,8 +12,8 @@
 - speaker: note blocks surrounding an empty bucket
 
 ### BUGS
-- recipes not showing up for blocks
-- speaker icon is huge
+- recipes not showing up for speaker
+- speaker item is huge
 
 ### TODO
 - on adding beats to graph, show connected paths using particle effects

@@ -32,7 +32,14 @@ public class Sequencer extends BeatBlock {
     instrument = noteBlock.getInstrument();
     // fetch instrument 
     if (instrument.equals(Instrument.CUSTOM_HEAD)) {
-      instrument = (Instrument) block.getMetadata("instrument").get(0).value();
+      if (block.hasMetadata("instrument")) {
+        instrument = (Instrument) block.getMetadata("instrument").get(0).value();
+      } else {
+        // reset block type to noteblock
+        block.setType(Material.NOTE_BLOCK);
+        noteBlock = (NoteBlock) block.getBlockData();
+        instrument = noteBlock.getInstrument();
+      }
     } else {
       instrument = noteBlock.getInstrument();
     }
@@ -63,6 +70,7 @@ public class Sequencer extends BeatBlock {
 
   public void play(Block step) { play(step, block.getLocation()); }
   public void play(Block step, Location at) { play(at); }
+  @SuppressWarnings("deprecation")
   public void play(Location at) {
     BeatCraft.debug(String.format("playing %s at %s, instrument: %s, note: %d", this, at, instrument, note.getId()));
     block.getWorld().playNote(at, instrument, note);

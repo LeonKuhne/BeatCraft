@@ -1,11 +1,12 @@
 package dev.leonk;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-
 import dev.leonk.blocks.BeatBlock;
 import dev.leonk.blocks.BlockManager;
 import dev.leonk.blocks.graph.Graph;
@@ -15,6 +16,7 @@ public class BeatCraft extends JavaPlugin {
   public static Logger log;
   public static JavaPlugin plugin;
   public static BlockManager blockManager;
+  private static Set<Player> debugPlayers;
 
   // 
   // lifecycle
@@ -23,6 +25,7 @@ public class BeatCraft extends JavaPlugin {
   public void onLoad() {
     plugin = this;
     log = getLogger();
+    debugPlayers = new HashSet<>();
     blockManager = new BlockManager();
   }
 
@@ -82,6 +85,18 @@ public class BeatCraft extends JavaPlugin {
       case "rerender":
         for (BeatBlock beat : blockManager.graph.beats()) beat.rerender();
         return true;
+
+      case "toggleDebug":
+        if (!(sender instanceof Player)) return false;
+        Player player = (Player) sender;
+        if (debugPlayers.contains(player)) {
+          player.sendMessage("debug mode disabled");
+          debugPlayers.remove(player);
+        } else {
+          player.sendMessage("debug mode enabled");
+          debugPlayers.add(player);
+        }
+        return true;
     }
     return false;
   }
@@ -91,7 +106,7 @@ public class BeatCraft extends JavaPlugin {
 
   public static void debug(String string) {
     log.info(string);
-    for (Player player : plugin.getServer().getOnlinePlayers()) {
+    for (Player player : debugPlayers) {
       player.sendMessage(string);
     }
   }
