@@ -42,8 +42,8 @@ public class BlockManager {
     //server.getScheduler().scheduleSyncRepeatingTask(plugin, graph::inspect, 0, 10);
   }
 
-  private void triggerSignal(Block block, String type) {
-    Node node = graph.find(block);
+  private void triggerSignal(BlockRef ref) {
+    Node node = graph.find(ref.block);
     if (node == null) return;
     BeatCraft.debug(String.format("triggering %s", node));
     graph.trigger(node);
@@ -56,16 +56,16 @@ public class BlockManager {
   //
   // world actions
 
-  private void transmute(Block block, String type) {
-    if (graph.find(block) != null) return;
+  private void transmute(BlockRef ref) {
+    if (graph.find(ref.block) != null) return;
     BeatBlock beat;
-    BeatCraft.debug(String.format("transmuting %s", type));
-    switch (type) {
-      case "Sequencer": beat = new Sequencer(block); break;
-      case "Send": beat = new Send(block); break;
-      case "Speaker": beat = new Speaker(block); break;
+    BeatCraft.debug(String.format("transmuting %s", ref.type));
+    switch (ref.type) {
+      case "Sequencer": beat = new Sequencer(ref.block); break;
+      case "Send": beat = new Send(ref.block, ref.orientation); break;
+      case "Speaker": beat = new Speaker(ref.block); break;
       default:
-        BeatCraft.debug(String.format("unknown transmutation: %s", type));
+        BeatCraft.debug(String.format("unknown transmutation: %s", ref.type));
         return;
     }
     BeatCraft.debug(String.format("graph state: %s", graph));
@@ -97,20 +97,20 @@ public class BlockManager {
     sequencer.rerender();
   }
 
-  private void destroy(Block block, String type) {
-    BeatCraft.debug(String.format("breaking %s", type));
-    Node node = graph.find(block);
+  private void destroy(BlockRef ref) {
+    BeatCraft.debug(String.format("breaking %s", ref.type));
+    Node node = graph.find(ref.block);
     if (node == null) return;
     BeatCraft.debug(String.format("breaking %s", node));
-    dropItem(type, block.getLocation());
+    dropItem(ref.type, ref.block.getLocation());
     graph.disconnect(node);
-    block.removeMetadata(BeatBlock.BASE_TYPE, BeatCraft.plugin);
+    ref.block.removeMetadata(BeatBlock.BASE_TYPE, BeatCraft.plugin);
   }
 
-  private void interact(Block block, String type) {
-    if (type != Sequencer.BASE_NAME) return;
-    BeatCraft.debug(String.format("interacting with %s", type));
-    Node node = graph.find(block);
+  private void interact(BlockRef ref) {
+    if (ref.type != Sequencer.BASE_NAME) return;
+    BeatCraft.debug(String.format("interacting with %s", ref.type));
+    Node node = graph.find(ref.block);
     if (node == null) return;
     Sequencer sequencer = (Sequencer) node.beat;
     sequencer.changePitchBy(1);

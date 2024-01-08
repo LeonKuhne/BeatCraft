@@ -79,8 +79,12 @@ public class BeatBlock {
     rerender();
   }
 
+  @SuppressWarnings("deprecation")
   public void rerender() {
+    BeatCraft.debug(String.format("rerendering %s with note id %d", this, blockModelId));
     NoteBlock note = (NoteBlock) block.getBlockData();
+    boolean needsUpdate = (note.getInstrument() != Instrument.CUSTOM_HEAD || blockModelId != note.getNote().getId());
+    if (!needsUpdate) return;
     note.setInstrument(Instrument.CUSTOM_HEAD);
     note.setNote(new Note(blockModelId));
     block.setBlockData(note);

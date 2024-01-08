@@ -2,7 +2,7 @@ package dev.leonk.blocks;
 
 import java.io.File;
 import java.util.Set;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
@@ -14,9 +14,9 @@ import org.bukkit.block.Block;
 public class BlockStore { 
   private ConnectionSource db; 
   private Dao<BeatBlock, Integer> blockTable;
-  private BiConsumer<Block, String> onPlace;
+  private Consumer<BlockRef> onPlace;
 
-  public BlockStore(BiConsumer<Block, String> onPlace) {
+  public BlockStore(Consumer<BlockRef> onPlace) {
     super();
     connect();
     this.onPlace = onPlace;
@@ -29,7 +29,9 @@ public class BlockStore {
     try {
       BeatCraft.debug(String.format("loading %d blocks", blockTable.countOf()));
       for (BeatBlock beat : blockTable.queryForAll()) {
-        onPlace.accept(BeatBlock.getBlockAt(beat), beat.type);
+        Block block = BeatBlock.getBlockAt(beat);
+        BlockRef ref = new BlockRef(block, beat.type);
+        onPlace.accept(ref);
       }
     } catch (Exception e) {
       BeatCraft.debug("could not load blocks");

@@ -2,6 +2,11 @@
   "variants": {
     "instrument=custom_head,note=0": { "model": "minecraft:block/sequencer" },
     "instrument=custom_head,note=1": { "model": "minecraft:block/send" },
-    "instrument=custom_head,note=2": { "model": "minecraft:block/speaker" }
+    "instrument=custom_head,note=2": { "model": "minecraft:block/send", "y": 90 },
+    "instrument=custom_head,note=3": { "model": "minecraft:block/send", "y": 180 },
+    "instrument=custom_head,note=4": { "model": "minecraft:block/send", "y": 270 },
+    "instrument=custom_head,note=5": { "model": "minecraft:block/send", "x": 90 },
+    "instrument=custom_head,note=6": { "model": "minecraft:block/send", "x": 270 },
+    "instrument=custom_head,note=7": { "model": "minecraft:block/speaker" }
   }
 }

@@ -51,7 +51,7 @@ public class BeatCraft extends JavaPlugin {
 
       // show graph
       case "graph":
-        BeatCraft.debug(String.format("Graph:\n%s", blockManager.graph));
+        BeatCraft.debug(blockManager.graph.toString());
         return true;
 
       // reset plugin
@@ -86,7 +86,7 @@ public class BeatCraft extends JavaPlugin {
         for (BeatBlock beat : blockManager.graph.beats()) beat.rerender();
         return true;
 
-      case "toggleDebug":
+      case "debug":
         if (!(sender instanceof Player)) return false;
         Player player = (Player) sender;
         if (debugPlayers.contains(player)) {

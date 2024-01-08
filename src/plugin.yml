@@ -10,4 +10,4 @@ website: leonk.dev
 commands:
   beat: 
     description: "Beat it."
-    usage: /<command> [clear, graph, reset, toggleDebug, code, rerender]
+    usage: /<command> [clear, graph, reset, debug, code, rerender]

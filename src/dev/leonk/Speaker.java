@@ -9,7 +9,7 @@ import dev.leonk.blocks.BeatBlock;
 
 public class Speaker extends BeatBlock {
   public static String BASE_NAME = "Speaker";
-  private static int BLOCK_MODEL_ID = 2;
+  private static int BLOCK_MODEL_ID = 7;
 
   public Speaker(Block block) { 
     super(block, BASE_NAME, BLOCK_MODEL_ID); 

@@ -1,8 +1,6 @@
 package dev.leonk.blocks;
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
@@ -16,23 +14,22 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.ItemStack;
-
 import dev.leonk.BeatCraft;
 
-public class BlockListener implements Listener {
 
-  private BiConsumer<Block, String> onPlace;
-  private BiConsumer<Block, String> onBreak;
-  private BiConsumer<Block, String> onPunch;
-  private BiConsumer<Block, String> onInteract;
+public class BlockListener implements Listener {
+  private Consumer<BlockRef> onPlace;
+  private Consumer<BlockRef> onBreak;
+  private Consumer<BlockRef> onPunch;
+  private Consumer<BlockRef> onInteract;
   private Consumer<Block> onUpdate;
   private Runnable onSave;
 
   public BlockListener(
-    BiConsumer<Block, String> onPlace, 
-    BiConsumer<Block, String> onBreak, 
-    BiConsumer<Block, String> onPunch, 
-    BiConsumer<Block, String> onInteract,
+    Consumer<BlockRef> onPlace, 
+    Consumer<BlockRef> onBreak, 
+    Consumer<BlockRef> onPunch, 
+    Consumer<BlockRef> onInteract,
     Consumer<Block> onUpdate,
     Runnable onSave
   ) {
@@ -58,7 +55,7 @@ public class BlockListener implements Listener {
     ItemStack item = event.getItem();
     if (item != null && event.getPlayer().isSneaking()) return;
     event.setCancelled(true);
-    onInteract.accept(block, type);
+    onInteract.accept(new BlockRef(block, type));
   }
 
   @EventHandler
@@ -66,8 +63,11 @@ public class BlockListener implements Listener {
     BeatCraft.debug(String.format("onBlockPlace, event %s", event));
     ItemStack item = event.getItemInHand();
     Block block = event.getBlockPlaced();
-    submitBlock(block, item, onPlace);
-    //onUpdate.accept(block);
+    BlockRef ref = submitBlock(block, item);
+    if (ref == null) return;
+    ref.orientation = event.getBlockAgainst().getFace(block);
+    BeatCraft.debug(String.format("placing with orientation: %s", ref.orientation));
+    onPlace.accept(ref);
   }
 
   @EventHandler
@@ -80,13 +80,17 @@ public class BlockListener implements Listener {
   @EventHandler
   public void onBlockBreak(BlockBreakEvent event) {
     BeatCraft.debug(String.format("onBlockBreak, event %s", event));
-    if (submitBlock(event, onBreak)) event.setDropItems(false);
-    //onUpdate.accept(event.getBlock());
+    BlockRef ref = submitBlock(event);
+    if (ref == null) return;
+    onBreak.accept(ref);
+    event.setDropItems(false);
   }
 
   @EventHandler
   public void onBlockDamage(BlockDamageEvent event) {
-    submitBlock(event, onPunch);
+    BlockRef ref = submitBlock(event);
+    if (ref == null) return;
+    onPunch.accept(ref);
   }
 
   @EventHandler
@@ -97,17 +101,11 @@ public class BlockListener implements Listener {
   // 
   // helpers
 
-  private boolean submitBlock(BlockEvent event, BiConsumer<Block, String> submit) {
-    Block block = event.getBlock();
-    return submitBlock(block, submit);
-  }
-  private boolean submitBlock(Block block, BiConsumer<Block, String> submit) {
-    return submitBlock(block, null, submit);
-  }
-  private boolean submitBlock(Block block, ItemStack item, BiConsumer<Block, String> submit) {
+  private BlockRef submitBlock(BlockEvent event) { return submitBlock(event.getBlock()); }
+  private BlockRef submitBlock(Block block) { return submitBlock(block, null); }
+  private BlockRef submitBlock(Block block, ItemStack item) {
     String type = item == null ? BeatBlock.getType(block) : BeatBlock.getType(item);
-    if (type == null) return false;
-    submit.accept(block, type);
-    return true;
+    if (type == null) return null;
+    return new BlockRef(block, type);
   }
 }
