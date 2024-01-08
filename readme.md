@@ -12,13 +12,16 @@
 - speaker: note blocks surrounding an empty bucket
 
 ### BUGS
+- stacking beats vertically times out the server, due to handling updates
 - recipes not showing up for speaker
 - speaker item is huge
 
 ### TODO
+- use simplified textures for models
 - make sends textures directional when placed
 - make sends connect mechanically directional
-- on adding beats to graph, show connected paths using particle effects
+- get speaker working
+- show connected paths using particle effects
 - spawn particles on beats indicating type of block
 - fix recipe deduction glitch
 - add delay based on the type of block that is put in the line
