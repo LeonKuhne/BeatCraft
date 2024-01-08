@@ -16,9 +16,10 @@
 - speaker item is huge
 
 ### TODO
+- make sends textures directional when placed
+- make sends connect mechanically directional
 - on adding beats to graph, show connected paths using particle effects
 - spawn particles on beats indicating type of block
-- rotate sends to change their direction and make texture directional
 - fix recipe deduction glitch
 - add delay based on the type of block that is put in the line
 - change pitch based on the type of block that is put in the line (up or down)
