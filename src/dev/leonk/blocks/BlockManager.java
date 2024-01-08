@@ -1,8 +1,10 @@
 package dev.leonk.blocks;
 
+import org.bukkit.Instrument;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.type.NoteBlock;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import dev.leonk.BeatCraft;
@@ -18,7 +20,13 @@ public class BlockManager {
   private BlockStore blockStorage;
 
   public BlockManager() {
-    blockUpdates = new BlockListener(this::transmute, this::destroy, this::triggerSignal, this::saveWorld);
+    blockUpdates = new BlockListener(
+      this::transmute, 
+      this::destroy, 
+      this::triggerSignal, 
+      this::interact,
+      this::update,
+      this::saveWorld);
     blockStorage = new BlockStore(this::transmute);
     graph = new Graph();
   }
@@ -31,26 +39,27 @@ public class BlockManager {
     blockStorage.load();
     server.getPluginManager().registerEvents(blockUpdates, plugin);
     server.getScheduler().scheduleSyncRepeatingTask(plugin, graph::propogate, 0, 4);
-    server.getScheduler().scheduleSyncRepeatingTask(plugin, graph::inspect, 0, 10);
+    //server.getScheduler().scheduleSyncRepeatingTask(plugin, graph::inspect, 0, 10);
   }
 
   private void triggerSignal(Block block, String type) {
-    Node node = graph.find(n -> n.beat.getBlock().equals(block));
-    BeatCraft.debug(String.format("triggering %s", node));
+    Node node = graph.find(block);
     if (node == null) return;
+    BeatCraft.debug(String.format("triggering %s", node));
     graph.trigger(node);
   }
 
   public void saveWorld() {
-    blockStorage.save(graph.blocks());
+    blockStorage.save(graph.beats());
   }
 
   //
   // world actions
 
   private void transmute(Block block, String type) {
-    BeatCraft.debug(String.format("transmuting %s", type));
+    if (graph.find(block) != null) return;
     BeatBlock beat;
+    BeatCraft.debug(String.format("transmuting %s", type));
     switch (type) {
       case "Sequencer": beat = new Sequencer(block); break;
       case "Send": beat = new Send(block); break;
@@ -63,9 +72,34 @@ public class BlockManager {
     graph.connect(beat);
   }
 
+  private void update(Block block) {
+    Node node = graph.find(block);
+    if (node == null) return;
+    update(node.beat);
+  }
+  private void update(BeatBlock beat) {
+    BeatCraft.debug(String.format("updating type: %s", beat.type));
+    if (beat instanceof Sequencer) {
+      update((Sequencer) beat);
+    } else {
+      BeatCraft.debug("rerendering beat on update");
+      beat.rerender();
+    }
+  }
+  private void update(Sequencer sequencer) {
+    BeatCraft.debug(String.format("updating sequencer %s", sequencer));
+    Instrument prev = sequencer.instrument;
+    NoteBlock noteBlock = (NoteBlock) sequencer.block.getBlockData();
+    Instrument next = noteBlock.getInstrument();
+    if (next == Instrument.CUSTOM_HEAD) return;
+    sequencer.instrument = next;
+    BeatCraft.debug(String.format("updating sequencers instrument %s -> %s", prev, sequencer.instrument));
+    sequencer.rerender();
+  }
+
   private void destroy(Block block, String type) {
     BeatCraft.debug(String.format("breaking %s", type));
-    Node node = graph.find(n -> n.beat.getBlock().equals(block));
+    Node node = graph.find(block);
     if (node == null) return;
     BeatCraft.debug(String.format("breaking %s", node));
     dropItem(type, block.getLocation());
@@ -73,12 +107,27 @@ public class BlockManager {
     block.removeMetadata(BeatBlock.BASE_TYPE, BeatCraft.plugin);
   }
 
+  private void interact(Block block, String type) {
+    if (type != Sequencer.BASE_NAME) return;
+    BeatCraft.debug(String.format("interacting with %s", type));
+    Node node = graph.find(block);
+    if (node == null) return;
+    Sequencer sequencer = (Sequencer) node.beat;
+    sequencer.changePitchBy(1);
+  }
+
   private void dropItem(String type, Location pos) {
     ItemStack item;
     switch(type) {
-      case "Sequencer": item = Sequencer.getItem(1); break;
-      case "Send": item = Send.getItem(1); break;
-      case "Speaker": item = Speaker.getItem(1); break;
+      case "Sequencer": 
+        item = Sequencer.getItem(1); 
+        break;
+      case "Send": 
+        item = Send.getItem(1); 
+        break;
+      case "Speaker": 
+        item = Speaker.getItem(1); 
+        break;
       default:
         BeatCraft.debug(String.format("unknown block broken: %s", type));
         return;

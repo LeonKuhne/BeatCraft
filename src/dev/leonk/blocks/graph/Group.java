@@ -86,19 +86,19 @@ public class Group extends HashSet<Node> {
     for (Edge edge : nextState) {
       if (edge.from.beat instanceof Sequencer) {
         Sequencer sequencer = (Sequencer) edge.from.beat;
-        Block cursor = edge.cursor();
-        Location playAt;
+        Block playhead = edge.cursor();
+        if (playhead == null) continue;
+        // play a note using the cursor
         if (speakers.isEmpty()) {
-          playback.add(() -> sequencer.play(cursor, cursor.getLocation()));
+          playback.add(() -> sequencer.play(playhead, playhead.getLocation()));
         } else {
           for (Speaker speaker : speakers) {
             Block speakerBlock = speaker.getBlock();
-            if (speakerBlock.equals(cursor)) {
-              playAt = speakerBlock.getLocation();
+            if (speakerBlock.equals(playhead)) {
+              Location playAt = speakerBlock.getLocation();
               playback.add(() -> {
-                sequencer.play(cursor, playAt);
-                // spawn a particle above the speaker
-                BeatBlock.noteParticle(sequencer.getNote(cursor).getNote(), playAt);
+                sequencer.play(playhead, playAt);
+                BeatBlock.noteParticle(sequencer.note, playAt);
               });
               break;
             }

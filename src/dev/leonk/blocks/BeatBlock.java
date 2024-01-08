@@ -2,7 +2,6 @@ package dev.leonk.blocks;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import org.bukkit.ChatColor;
 import org.bukkit.Instrument;
 import org.bukkit.Location;
@@ -29,6 +28,7 @@ public class BeatBlock {
   protected static String BASE_TYPE = "beat_block";
   protected static NamespacedKey itemId = new NamespacedKey(BeatCraft.plugin, BASE_TYPE);
   protected Block block;
+  private int blockModelId;
 
   @DatabaseField(generatedId = true)
   private int id;
@@ -45,13 +45,14 @@ public class BeatBlock {
 
   public BeatBlock() {}
   public BeatBlock(Block block, String type, int blockModelId) {
-    this.type = type;
     this.block = block;
+    this.type = type;
+    this.blockModelId = blockModelId;
     this.world = block.getWorld().getName();
     this.x = block.getX();
     this.y = block.getY();
     this.z = block.getZ();
-    place(block, type, blockModelId);
+    replace(block);
   }
 
   public String getName() { return type; }
@@ -72,14 +73,18 @@ public class BeatBlock {
     pos.getWorld().spawnParticle(Particle.NOTE, pos, 0, noteColor, 0, 0, 1);
   }
 
-  public static void place(Block block, String type, int blockModelId) {
+  public void replace(Block block) {
     block.setType(Material.NOTE_BLOCK);
     block.setMetadata(BASE_TYPE, new FixedMetadataValue(BeatCraft.plugin, type));
-    // set instrument to custom head
+    rerender();
+  }
+
+  public void rerender() {
     NoteBlock note = (NoteBlock) block.getBlockData();
     note.setInstrument(Instrument.CUSTOM_HEAD);
     note.setNote(new Note(blockModelId));
     block.setBlockData(note);
+    BeatCraft.debug(String.format("rerendered %s with note %s", this, note));
   }
 
   //
@@ -106,20 +111,10 @@ public class BeatBlock {
   }
 
   public static String getType(Block block) {
+    if (block.hasMetadata("mock")) return null;
     List<MetadataValue> meta = block.getMetadata(BASE_TYPE);
     if (meta.isEmpty()) return null;
     return meta.get(0).asString();
-  }
-
-  public static ItemStack uncraft(Set<ItemStack> ingredients, String type, ItemStack result) {
-    // 1 sequencer -> 8 note blocks
-    if (ingredients.size() == 1) {
-      ItemStack item = ingredients.iterator().next(); 
-      if (type.equals(BeatBlock.getType(item))) {
-        return result;
-      }
-    }
-    return null;
   }
 
   //

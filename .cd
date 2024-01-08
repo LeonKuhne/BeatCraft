@@ -10,6 +10,7 @@ function build() {
 
 function pack() {
   if [ ! -d "resources" ]; then; err "Expected resources directory 'resources'" && return; fi
+  rm pack.zip
   (cd resources && zip -r ../pack.zip .)
   # save to resource pack folder
   resource_pack_destination=/mnt/c/Users/leonk/AppData/Roaming/.minecraft/resourcepacks/BeatCraft.zip

@@ -20,6 +20,7 @@ import dev.leonk.blocks.BeatBlock;
 public class Graph {
   public Set<Group> groups;
   private Set<Edge> edges;
+  public static double inspectSpeed = 0.1;
 
   public Graph() {
     groups = new HashSet<>();
@@ -48,9 +49,14 @@ public class Graph {
     }
   }
 
-  public void connect(BeatBlock beat) {
-    Node node = new Node(beat);
+  public void connect(BeatBlock beat) { connect(new Node(beat)); }
+  private void connect(Node node) {
     Map<BlockFace, Edge> connections = sameAxis(node);
+    if (connections.isEmpty()) {
+      BeatCraft.debug(String.format("no connections for %s", node));
+      insert(node);
+      return;
+    }
     // connect all edges / find involved groups
     Set<Group> involvedGroups = new HashSet<>();
     for (Edge edge : connections.values()) {
@@ -63,37 +69,39 @@ public class Graph {
     BeatCraft.debug(String.format("state after connect: %s", this));
   }
 
+  private void insert(Node node) {
+    Group group = new Group();
+    group.add(node);
+    groups.add(group);
+  }
+
   public void disconnect(Node node) {
-    // disconnect all edges
-    for (Edge edge : node.connections.values()) {
-      edges.remove(edge);
+    // disconnect edges
+    HashSet<Edge> toRemove = new HashSet<>(node.connections.values());
+    for (Edge edge : toRemove) {
       edge.disconnect();
+      edges.remove(edge);
     }
-
-    // remove node's group
+    // remove group
     remove(findGroup(node));
-
-    for (Edge edge : node.connections.values()) {
-      // connect edges passing back
-      Edge edgePassingBack = sameAxis(edge.to).get(edge.direction.getOppositeFace());
-      if (edgePassingBack == null) continue;
-      edgePassingBack.connect();
-      // collect new groups
-      Group newGroup = new Group();
-      for (Node newNode : Group.collectNodes(edge.to)) newGroup.add(newNode);
-      groups.add(newGroup);
+    // reconnect all edges
+    for (Edge edge : toRemove) {
+      connect(edge.to == node ? edge.from : edge.to);
     }
-
     BeatCraft.debug(String.format("state after disconnect: %s", this));
   }
 
-  public BeatBlock find(Block block) { 
-    Node node = find(n -> n.beat.getBlock().equals(block)); 
-    if (node == null) return null;
-    return node.beat;
+  public Node find(Block block) {
+    String type = BeatBlock.getType(block);
+    if (type == null) return null;
+    return find(n -> n.beat.getBlock().equals(block)); 
   }
   public Node find(Function<Node, Boolean> filter) {
-    for (Node node : nodes()) if (filter.apply(node)) return node;
+    for (Node node : nodes()) {
+      if (filter.apply(node)) {
+        return node;
+      }
+    }
     return null;
   }
 
@@ -103,7 +111,7 @@ public class Graph {
     return null;
   }
 
-  public Set<BeatBlock> blocks() {
+  public Set<BeatBlock> beats() {
     Set<BeatBlock> blocks = new HashSet<>();
     for (Node node : nodes()) blocks.add(node.beat);
     return blocks;
@@ -209,19 +217,20 @@ public class Graph {
   private void spawnParticle(Edge edge) {
       Block block = edge.from.beat.getBlock();
       World world = block.getWorld();
-      Location spawn = block.getLocation();
+      Vector direction = edge.direction.getDirection();
+      Location spawn = block.getLocation()
+        .add(0.5, 0.5, 0.5)        // move to center
+        .add(direction.multiply(0.5)); // move to face
 
       // spawn a snowball
       Snowball snowball = world.spawn(spawn, Snowball.class);
-      Vector velocity = edge.direction.getDirection().multiply(0.5);
-      snowball.setVelocity(velocity);
+      snowball.setVelocity(direction.multiply(inspectSpeed));
 
       // spawn invisible armor stand
       ArmorStand armorStand = (ArmorStand) world.spawnEntity(spawn, EntityType.ARMOR_STAND);
       armorStand.setGravity(false);
       armorStand.setVisible(false);
       armorStand.setSmall(true);
-      armorStand.setInvulnerable(true);
       armorStand.setCollidable(false);
       armorStand.addPassenger(snowball);
   }

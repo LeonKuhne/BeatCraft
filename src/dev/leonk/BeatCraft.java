@@ -5,7 +5,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import dev.leonk.blocks.BeatBlock;
 import dev.leonk.blocks.BlockManager;
+import dev.leonk.blocks.graph.Graph;
 
 public class BeatCraft extends JavaPlugin {
 
@@ -58,7 +61,27 @@ public class BeatCraft extends JavaPlugin {
       case "code":
         if (args.length < 2) return false;
         BeatCraft.debug(String.format("code of %s is %s", args[1], args[1].hashCode() % 1000));
+        return true;
 
+      // get the code of a string
+      case "inspectSpeed":
+        if (args.length < 2) return false;
+        try {
+          Graph.inspectSpeed = Double.parseDouble(args[1]);
+          BeatCraft.debug(String.format("inspectSpeed set to %s", Graph.inspectSpeed));
+        } catch (NumberFormatException e) {
+          BeatCraft.debug(String.format("inspectSpeed must be a number, got %s", args[1]));
+        }
+        return true;
+
+      case "inspect":
+        BeatCraft.debug("inspecting graph");
+        for (BeatBlock beat : blockManager.graph.beats()) debug(beat.toString());
+        return true;
+
+      case "rerender":
+        for (BeatBlock beat : blockManager.graph.beats()) beat.rerender();
+        return true;
     }
     return false;
   }
